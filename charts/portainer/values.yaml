@@ -5,8 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: portainerci/portainer:develop
-  tag: linux-amd64
+  repository: portainerci/portainer
+  tag: develop
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
