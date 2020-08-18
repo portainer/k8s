@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "portainer.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    io.portainer.kubernetes.application.stack: portainer
+    {{- include "portainer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "portainer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "portainer.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "portainer.serviceAccountName" . }}
+      volumes:
+         - name: "data"
+           persistentVolumeClaim:
+             claimName: {{ template "portainer.pvcName" . }}      
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+            - name: tcp-edge
+              containerPort: 8000
+              protocol: TCP              
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9000
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
