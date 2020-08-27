@@ -16,14 +16,14 @@ type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
-version: 0.0.1-fp1
+version: 1.0.0-pre1
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application.
-appVersion: 1.0.0
+appVersion: 2.0.0
 
 sources:
-    - https://github.com/portainer/portainer-k8s
+    - https://github.com/portainer/k8s
 
 maintainers:
     - name: funkypenguin
