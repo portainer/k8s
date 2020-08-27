@@ -1,0 +1,32 @@
+name: Publish helm chart
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'deploy/helm/charts/**' 
+      - '.github/**'         
+      
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Fetch history
+      run: git fetch --prune --unshallow
+
+    - name: Configure Git
+      run: |
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+    - name: Run chart-releaser
+      uses: helm/chart-releaser-action@v1.0.0
+      with:
+        charts_dir: deploy/helm/charts/      
+      env:
+        CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
