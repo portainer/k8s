@@ -4,6 +4,7 @@ kind: "PersistentVolumeClaim"
 apiVersion: "v1"
 metadata:
   name: {{ template "portainer.fullname" . }}
+  namespace: {{ .Release.Namespace }}  
   annotations:
   {{- if .Values.persistence.storageClass }}
     volume.beta.kubernetes.io/storage-class: {{ .Values.persistence.storageClass | quote }}
