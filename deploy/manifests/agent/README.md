@@ -11,7 +11,7 @@ To deploy an Edge agent inside your Kubernetes cluster, it is recommended to fol
 If your cloud provider supports external load balancers, you can use the following command to deploy the regular Portainer agent (not Edge):
 
 ```
-kubectl ... apply -f portainer-agent.yaml
+kubectl ... apply -f portainer-agent-k8s-lb.yaml
 ```
 
 This will deploy the Portainer agent and create an external load balancer which you'll be able to use to connect to the agent on port 9001.
