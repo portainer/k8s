@@ -5,8 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: portainerci/portainer
-  tag: develop
+  repository: portainer/portainer-ce
+  tag: latest
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -21,15 +21,15 @@ service:
   # For Cloud Providers, set the type to be LoadBalancer
   type: ClusterIP
   httpPort: 9000
-  httpNodePort: 
+  httpNodePort:
   edgePort: 8000
-  edgeNodePort: 
+  edgeNodePort:
 
 ingress:
   enabled: false
   annotations: {}
   hosts:
-    - host: 
+    - host:
       paths: []
   tls: []
 

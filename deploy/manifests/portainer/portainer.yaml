@@ -4,7 +4,7 @@ kind: "PersistentVolumeClaim"
 apiVersion: "v1"
 metadata:
   name: portainer
-  namespace: portainer  
+  namespace: portainer
   annotations:
     volume.alpha.kubernetes.io/storage-class: "generic"
   labels:
@@ -101,10 +101,10 @@ spec:
       volumes:
          - name: "data"
            persistentVolumeClaim:
-             claimName: portainer      
+             claimName: portainer
       containers:
         - name: portainer
-          image: "portainerci/portainer:develop"
+          image: "portainer/portainer-ce:latest"
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: data
@@ -115,7 +115,7 @@ spec:
               protocol: TCP
             - name: tcp-edge
               containerPort: 8000
-              protocol: TCP              
+              protocol: TCP
           livenessProbe:
             httpGet:
               path: /
@@ -126,4 +126,3 @@ spec:
               port: 9000
           resources:
             {}
-

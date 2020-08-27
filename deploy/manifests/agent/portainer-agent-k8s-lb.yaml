@@ -64,7 +64,7 @@ spec:
       serviceAccountName: portainer-sa-clusteradmin
       containers:
       - name: portainer-agent
-        image: portainer/agent-k8s-beta:linux-amd64
+        image: portainer/agent:latest
         imagePullPolicy: Always
         env:
         - name: LOG_LEVEL
