@@ -43,8 +43,13 @@ For advanced helm customization, see the [chart README](/charts/portainer/README
 
 ## Quickstart with manifests
 
-If you're not into helm, you can install Portainer using manifests, by running:
+If you're not into helm, you can install Portainer using manifests, by first creating the portainer namespace:
 
+```
+kubectl create namespace portainer
+```
+
+And then...
 
 ### Using NodePort on a local/remote cluster
 
