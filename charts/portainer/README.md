@@ -57,17 +57,17 @@ The following table lists the configurable parameters of the Portainer chart and
 | Parameter | Description | Default |
 | - | - | - |
 | `replicaCount` | Number of Portainer service replicas (ALWAYS set to 1) | `1` |
-| `image.repository` | Portainer Docker Hub repository | `portainer/portainer-k8s-beta` |
-| `image.tag` | Tag for the Portainer image; `linux-amd64` for Linux and `linux-arm` for ARM | `linux-amd64` |
+| `image.repository` | Portainer Docker Hub repository | `portainer/portainer-ce` |
+| `image.tag` | Tag for the Portainer image | `latest` |
 | `image.pullPolicy` | Portainer image pulling policy | `IfNotPresent` |
 | `imagePullSecrets` | If Portainer image requires to be in a private repository | `nil` |
 | `serviceAccount.annotations` | Annotations to add to the service account | `null` |
 | `serviceAccount.name` | The name of the service account to use | `portainer-sa-clusteradmin` |
 | `service.type` | Service Type for the main Portainer Service; ClusterIP, NodePort and LoadBalancer | `LoadBalancer` |
 | `service.httpPort` | HTTP port for accessing Portainer Web | `9000` |
-| `service.httpNodePort` | Static NodePort for accessing Portainer Web. Specify only if the type is NodePort | `nil` |
+| `service.httpNodePort` | Static NodePort for accessing Portainer Web. Specify only if the type is NodePort | `30777` |
 | `service.edgePort` | TCP port for accessing Portainer Edge | `8000` |
-| `service.edgeNodePort` | Static NodePort for accessing Portainer Edge. Specify only if the type is NodePort | `nil` |
+| `service.edgeNodePort` | Static NodePort for accessing Portainer Edge. Specify only if the type is NodePort | `30776` |
 | `ingress.enabled` | Create an ingress for Portainer | `false` |
 | `ingress.annotations` | Annotations to add to the ingress. For instane, `kubernetes.io/ingress.class: nginx` | `{}` |
 | `ingress.hosts.host` | URL for Portainer Web. For instance, `portainer.example.io` | `nil` |
