@@ -6,6 +6,13 @@ For instance:
 kubectl create namespace portainer
 ```
 
+# Install the chart repository
+
+```bash
+helm repo add portainer https://portainer.github.io/k8s/
+helm repo update
+```
+
 # Testing the Chart
 Execute the following for testing the chart:
 
@@ -17,7 +24,8 @@ helm install --dry-run --debug portainer -n portainer deploy/helm/portainer
 Execute the following for installing the chart:
 
 ```bash
-helm upgrade -i -n portainer portainer deploy/helm/portainer
+helm upgrade -i -n portainer portainer portainer/portainer
+
 ## Refer to the output NOTES on how-to access Portainer web
 ## An example is attached below
 
