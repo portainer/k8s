@@ -19,11 +19,11 @@ service:
   # Set the httpNodePort and edgeNodePort only if the type is NodePort
   # For Ingress, set the type to be ClusterIP and set ingress.enabled to true
   # For Cloud Providers, set the type to be LoadBalancer
-  type: ClusterIP
+  type: NodePort
   httpPort: 9000
-  httpNodePort:
+  httpNodePort: 30777
   edgePort: 8000
-  edgeNodePort:
+  edgeNodePort: 30776
 
 ingress:
   enabled: false

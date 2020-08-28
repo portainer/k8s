@@ -8,6 +8,8 @@ metadata:
     {{- include "portainer.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: "Recreate"
   selector:
     matchLabels:
       {{- include "portainer.selectorLabels" . | nindent 6 }}
@@ -29,6 +31,9 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+      {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
+          args:  [ '--tunnel-port','{{ .Values.service.edgeNodePort }}' ]
+      {{- end }}          
           volumeMounts:
             - name: data
               mountPath: /data
