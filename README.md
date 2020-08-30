@@ -55,12 +55,12 @@ And then...
 
 ```
 kubectl create namespace portainer
-kubectl apply -n portainer -f https://portainer.github.io/k8s//deploy/manifests/portainer/portainer.yaml
+kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer.yaml
 ```
 
 ###  Using a cloud provider's loadbalancer
 
 ```
 kubectl create namespace portainer
-kubectl apply -n portainer -f https://portainer.github.io/k8s//deploy/manifests/portainer/portainer-lb.yaml
+kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-lb.yaml
 ```
