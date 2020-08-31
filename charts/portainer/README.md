@@ -77,7 +77,7 @@ The following table lists the configurable parameters of the Portainer chart and
 | `resources` | Portainer resource requests and limits | `{}` |
 | `persistence.enabled` | Whether to enable data persistence | `true` |
 | `persistence.existingClaim` | Name of an existing PVC to use for data persistence | `nil` |
-| `persistence.size` | Size of the PVC used for persistence | `1Gi` |
+| `persistence.size` | Size of the PVC used for persistence | `10Gi` |
 | `persistence.annotations` | Annotations to apply to PVC used for persistence | `{}` |
 | `persistence.storageClass` | StorageClass to apply to PVC used for persistence | `default` |
 | `persistence.accessMode` | AccessMode for persistence | `ReadWriteOnce` |

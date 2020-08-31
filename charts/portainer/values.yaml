@@ -36,5 +36,5 @@ ingress:
 resources: {}
 
 persistence:
-  size: "1Gi"
+  size: "10Gi"
   annotations: {}
