@@ -69,7 +69,7 @@ spec:
         imagePullPolicy: Always
         env:
         - name: LOG_LEVEL
-          value: DEBUG
+          value: INFO
         - name: AGENT_CLUSTER_ADDR
           value: "portainer-agent-headless"
         - name: KUBERNETES_POD_IP
