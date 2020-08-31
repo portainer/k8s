@@ -3,6 +3,24 @@ entries:
   portainer:
   - apiVersion: v2
     appVersion: 2.0.0
+    created: "2020-08-31T03:07:15.090536611Z"
+    description: Helm chart used to deploy the Portainer for Kubernetes
+    digest: 5c3c00397ca1364c2907ab8cc514974be788671121d5122324d9174dce4c1038
+    home: https://www.portainer.io
+    icon: https://github.com/portainer/portainer/raw/develop/app/assets/ico/apple-touch-icon.png
+    maintainers:
+    - email: davidy@funkypenguin.co.nz
+      name: funkypenguin
+      url: https://www.funkypenguin.co.nz
+    name: portainer
+    sources:
+    - https://github.com/portainer/k8s
+    type: application
+    urls:
+    - https://github.com/portainer/k8s/releases/download/portainer-1.0.2/portainer-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
+    appVersion: 2.0.0
     created: "2020-08-28T03:09:57.770163753Z"
     description: Helm chart used to deploy the Portainer for Kubernetes
     digest: 94e86def2616805735d6e0ea454ade9343df91809f5a9cb16ae48e16356dba98
