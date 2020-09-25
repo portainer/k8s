@@ -24,6 +24,7 @@ service:
   httpNodePort: 30777
   edgePort: 8000
   edgeNodePort: 30776
+  annotations: {}
 
 ingress:
   enabled: false
