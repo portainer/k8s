@@ -68,6 +68,7 @@ The following table lists the configurable parameters of the Portainer chart and
 | `service.httpNodePort` | Static NodePort for accessing Portainer Web. Specify only if the type is NodePort | `30777` |
 | `service.edgePort` | TCP port for accessing Portainer Edge | `8000` |
 | `service.edgeNodePort` | Static NodePort for accessing Portainer Edge. Specify only if the type is NodePort | `30776` |
+| `service.annotations` | Annotations to add to the service | `{}` |
 | `ingress.enabled` | Create an ingress for Portainer | `false` |
 | `ingress.annotations` | Annotations to add to the ingress. For instane, `kubernetes.io/ingress.class: nginx` | `{}` |
 | `ingress.hosts.host` | URL for Portainer Web. For instance, `portainer.example.io` | `nil` |
