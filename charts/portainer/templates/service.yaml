@@ -22,8 +22,13 @@ spec:
       {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.httpNodePort))) }}
       nodePort: {{ .Values.service.httpNodePort}}
       {{- end }}
+      {{- if (eq .Values.service.type "NodePort") }}
+    - port: {{ .Values.service.edgeNodePort }}
+      targetPort: {{ .Values.service.edgeNodePort }}
+      {{- else }}
     - port: {{ .Values.service.edgePort }}
-      targetPort: 8000
+      targetPort: {{ .Values.service.edgePort }}
+      {{- end }}
       protocol: TCP
       name: edge
       {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
