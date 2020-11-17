@@ -67,8 +67,8 @@ spec:
       protocol: TCP
       name: http
       nodePort: 30777
-    - port: 8000
-      targetPort: 8000
+    - port: 30776
+      targetPort: 30776
       protocol: TCP
       name: edge
       nodePort: 30776

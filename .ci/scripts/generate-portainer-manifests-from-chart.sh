@@ -15,7 +15,7 @@
 # 2. Remove the header produced by helf --dry-run
 # 3. Remove references to helm in rendered manifests (no point attaching a label like "app.kubernetes.io/managed-by: Helm" if we are not!)
 
-helm install --no-hooks --namespace zorgburger --set disableTest=true --dry-run zorgburger charts/portainer \
+helm install --no-hooks --namespace zorgburger --set service.type=NodePort --set disableTest=true --dry-run zorgburger charts/portainer \
 | sed -n '1,/NOTES/p' | sed \$d \
 | grep -vE 'NAME|LAST DEPLOYED|NAMESPACE|STATUS|REVISION|HOOKS|MANIFEST|TEST SUITE' \
 | grep -iv helm \
