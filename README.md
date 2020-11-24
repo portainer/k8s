@@ -1,5 +1,5 @@
 
-This repo contains helm and YAML (yuch) for deploying Portainer into a Kubernetes environment. Follow the applicable instructions for your edition / deployment methodology below:
+This repo contains helm and YAML for deploying Portainer into a Kubernetes environment. Follow the applicable instructions for your edition / deployment methodology below:
 
 - [Deploying with Helm](#deploying-with-helm)
   - [Community Edition](#community-edition)
