@@ -4,6 +4,14 @@
 
 replicaCount: 1
 
+# If enterpriseEdition is enabled, then use the values below _instead_ of those in .image
+enterpriseEdition: 
+  enabled: false
+  image:
+    repository: portainer/portainer-ee
+    tag: latest
+    pullPolicy: IfNotPresent
+
 image:
   repository: portainer/portainer-ce
   tag: latest
