@@ -106,7 +106,7 @@ spec:
              claimName: portainer      
       containers:
         - name: portainer
-          image: "portainer/portainer-ee:latest"
+          image: "portainer/portainer-ee:2.0.0"
           imagePullPolicy: IfNotPresent          
           volumeMounts:
             - name: data
