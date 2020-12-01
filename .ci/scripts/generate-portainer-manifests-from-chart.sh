@@ -15,6 +15,7 @@
 # 2. Remove the header produced by helf --dry-run
 # 3. Remove references to helm in rendered manifests (no point attaching a label like "app.kubernetes.io/managed-by: Helm" if we are not!)
 
+# Create nodeport manifest for ce
 helm install --no-hooks --namespace zorgburger --set service.type=NodePort --set disableTest=true --dry-run zorgburger charts/portainer \
 | sed -n '1,/NOTES/p' | sed \$d \
 | grep -vE 'NAME|LAST DEPLOYED|NAMESPACE|STATUS|REVISION|HOOKS|MANIFEST|TEST SUITE' \
@@ -23,6 +24,8 @@ helm install --no-hooks --namespace zorgburger --set service.type=NodePort --set
 | sed 's/portainer-portainer/portainer/' \
 > deploy/manifests/portainer/portainer.yaml
 
+
+# Create lb manifest for ce
 helm install --no-hooks --namespace zorgburger --set service.type=LoadBalancer --set disableTest=true --dry-run zorgburger charts/portainer \
 | sed -n '1,/NOTES/p' | sed \$d \
 | grep -vE 'NAME|LAST DEPLOYED|NAMESPACE|STATUS|REVISION|HOOKS|MANIFEST|TEST SUITE' \
@@ -30,3 +33,21 @@ helm install --no-hooks --namespace zorgburger --set service.type=LoadBalancer -
 | sed 's/zorgburger/portainer/' \
 | sed 's/portainer-portainer/portainer/' \
 > deploy/manifests/portainer/portainer-lb.yaml
+
+# Create nodeport manifest for ee
+helm install --no-hooks --namespace zorgburger --set enterpriseEdition.enabled=true --set service.type=NodePort --set disableTest=true --dry-run zorgburger charts/portainer \
+| sed -n '1,/NOTES/p' | sed \$d \
+| grep -vE 'NAME|LAST DEPLOYED|NAMESPACE|STATUS|REVISION|HOOKS|MANIFEST|TEST SUITE' \
+| grep -iv helm \
+| sed 's/zorgburger/portainer/' \
+| sed 's/portainer-portainer/portainer/' \
+> deploy/manifests/portainer/portainer-ee.yaml
+
+# Create lb manifest for ee
+helm install --no-hooks --namespace zorgburger --set enterpriseEdition.enabled=true --set service.type=LoadBalancer --set disableTest=true --dry-run zorgburger charts/portainer \
+| sed -n '1,/NOTES/p' | sed \$d \
+| grep -vE 'NAME|LAST DEPLOYED|NAMESPACE|STATUS|REVISION|HOOKS|MANIFEST|TEST SUITE' \
+| grep -iv helm \
+| sed 's/zorgburger/portainer/' \
+| sed 's/portainer-portainer/portainer/' \
+> deploy/manifests/portainer/portainer-lb-ee.yaml

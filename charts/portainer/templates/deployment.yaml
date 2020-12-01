@@ -29,8 +29,13 @@ spec:
              claimName: {{ template "portainer.pvcName" . }}      
       containers:
         - name: {{ .Chart.Name }}
+          {{- if .Values.enterpriseEdition.enabled }}
+          image: "{{ .Values.enterpriseEdition.image.repository }}:{{ .Values.enterpriseEdition.image.tag }}"
+          imagePullPolicy: {{ .Values.enterpriseEdition.image.pullPolicy }}
+          {{- else }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
       {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
           args:  [ '--tunnel-port','{{ .Values.service.edgeNodePort }}' ]
       {{- end }}          
