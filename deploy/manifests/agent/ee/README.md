@@ -1,6 +1,6 @@
-# Agent
+# Agent (Enterprise Edition)
 
-The manifests used to deploy the Portainer agent inside a Kubernetes cluster.
+The manifests used to deploy the Portainer agent inside a Kubernetes cluster for Enterprise Edition.
 
 To deploy an Edge agent inside your Kubernetes cluster, it is recommended to follow the instructions available inside your Portainer instance.
 

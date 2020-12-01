@@ -2,6 +2,8 @@
 
 The manifests used to deploy the Portainer agent inside a Kubernetes cluster.
 
+**NOTE**: Manifests to deploy the Portainer agent Enterprise Edition are available in the *ee* folder. 
+
 To deploy an Edge agent inside your Kubernetes cluster, it is recommended to follow the instructions available inside your Portainer instance.
 
 # Usage
