@@ -66,20 +66,20 @@ For advanced helm customization, see the [chart README](/charts/portainer/README
 ### Using NodePort on a local/remote cluster
 
 ```
-helm install --set entepriseEdition.enabled=true -n portainer portainer portainer/portainer
+helm install --set enterpriseEdition.enabled=true -n portainer portainer portainer/portainer
 ```
 
 ###  Using a cloud provider's loadbalancer
 
 ```
-helm install  --set entepriseEdition.enabled=true -n portainer portainer portainer/portainer --set service.type=LoadBalancer
+helm install  --set enterpriseEdition.enabled=true -n portainer portainer portainer/portainer --set service.type=LoadBalancer
 ```
 
 
 ### Using ClusterIP with an ingress
 
 ```
-helm install  --set entepriseEdition.enabled=true -n portainer portainer portainer/portainer --set service.type=ClusterIP
+helm install  --set enterpriseEdition.enabled=true -n portainer portainer portainer/portainer --set service.type=ClusterIP
 ```
 
 For advanced helm customization, see the [chart README](/charts/portainer/README.md)
