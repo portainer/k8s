@@ -1,0 +1,18 @@
+{{- if not .Values.disableTest -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "portainer.fullname" . }}-test-connection"
+  namespace: {{ .Release.Namespace }}  
+  labels:
+    {{- include "portainer.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "portainer.fullname" . }}:{{ .Values.service.httpPort }}']
+  restartPolicy: Never
+{{ end }}
