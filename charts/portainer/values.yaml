@@ -4,6 +4,14 @@
 
 replicaCount: 1
 
+# If enterpriseEdition is enabled, then use the values below _instead_ of those in .image
+enterpriseEdition: 
+  enabled: false
+  image:
+    repository: portainer/portainer-ee
+    tag: 2.0.0
+    pullPolicy: IfNotPresent
+
 image:
   repository: portainer/portainer-ce
   tag: latest
@@ -24,6 +32,7 @@ service:
   httpNodePort: 30777
   edgePort: 8000
   edgeNodePort: 30776
+  annotations: {}
 
 ingress:
   enabled: false
@@ -36,5 +45,5 @@ ingress:
 resources: {}
 
 persistence:
-  size: "1Gi"
+  size: "10Gi"
   annotations: {}

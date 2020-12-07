@@ -6,7 +6,8 @@ on:
       - master
     paths:
       - 'charts/**' 
-      - '.github/**'         
+      - '.github/**'     
+      - 'deploy/manifests/**'    
       
 jobs:
   build:
@@ -28,3 +29,10 @@ jobs:
       uses: helm/chart-releaser-action@v1.0.0
       env:
         CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+    - name: sync gh-pages branch
+      uses: repo-sync/pull-request@v2
+      with:
+        destination_branch: "gh-pages"
+        github_token: "${{ secrets.GITHUB_TOKEN }}"
+        pr_allow_empty: false        
