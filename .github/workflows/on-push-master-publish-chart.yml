@@ -34,4 +34,5 @@ jobs:
       uses: repo-sync/pull-request@v2
       with:
         destination_branch: "gh-pages"
+        github_token: "${{ secrets.GITHUB_TOKEN }}"
         pr_allow_empty: false        
