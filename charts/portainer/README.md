@@ -61,6 +61,7 @@ The following table lists the configurable parameters of the Portainer chart and
 | `image.tag` | Tag for the Portainer image | `latest` |
 | `image.pullPolicy` | Portainer image pulling policy | `IfNotPresent` |
 | `imagePullSecrets` | If Portainer image requires to be in a private repository | `nil` |
+| `nodeSelector` | Used to apply a nodeSelector to the deployment | `{}` |
 | `serviceAccount.annotations` | Annotations to add to the service account | `null` |
 | `serviceAccount.name` | The name of the service account to use | `portainer-sa-clusteradmin` |
 | `service.type` | Service Type for the main Portainer Service; ClusterIP, NodePort and LoadBalancer | `LoadBalancer` |
