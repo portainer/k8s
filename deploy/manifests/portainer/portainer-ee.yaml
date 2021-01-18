@@ -1,4 +1,15 @@
 ---
+# Source: portainer/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: portainer-sa-clusteradmin
+  namespace: portainer
+  labels:
+    app.kubernetes.io/name: portainer
+    app.kubernetes.io/instance: portainer
+    app.kubernetes.io/version: "2.0.1"
+---
 # Source: portainer/templates/pvc.yaml
 kind: "PersistentVolumeClaim"
 apiVersion: "v1"
@@ -11,24 +22,13 @@ metadata:
     io.portainer.kubernetes.application.stack: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "2.0.1"
 spec:
   accessModes:
     - "ReadWriteOnce"
   resources:
     requests:
       storage: "10Gi"
----
-# Source: portainer/templates/serviceaccount.yaml
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: portainer-sa-clusteradmin
-  namespace: portainer
-  labels:
-    app.kubernetes.io/name: portainer
-    app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "2.0.0"
 ---
 # Source: portainer/templates/rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -38,7 +38,7 @@ metadata:
   labels:
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "2.0.1"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -58,7 +58,7 @@ metadata:
     io.portainer.kubernetes.application.stack: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "2.0.1"
 spec:
   type: NodePort
   ports:
@@ -86,7 +86,7 @@ metadata:
     io.portainer.kubernetes.application.stack: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "2.0.1"
 spec:
   replicas: 1
   strategy:
@@ -101,6 +101,8 @@ spec:
         app.kubernetes.io/name: portainer
         app.kubernetes.io/instance: portainer
     spec:
+      nodeSelector:
+        {}
       serviceAccountName: portainer-sa-clusteradmin
       volumes:
          - name: "data"
@@ -109,7 +111,7 @@ spec:
       containers:
         - name: portainer
           image: "portainer/portainer-ee:2.0.0"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           args:  [ '--tunnel-port','30776' ]          
           volumeMounts:
             - name: data

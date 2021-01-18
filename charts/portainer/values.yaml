@@ -10,12 +10,12 @@ enterpriseEdition:
   image:
     repository: portainer/portainer-ee
     tag: 2.0.0
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 
 image:
   repository: portainer/portainer-ce
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 imagePullSecrets: []
 
