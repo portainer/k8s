@@ -49,3 +49,4 @@ resources: {}
 persistence:
   size: "10Gi"
   annotations: {}
+  storageClass:
