@@ -34,6 +34,7 @@ jobs:
               --ignore-test deployment-has-poddisruptionbudget
               --ignore-test deployment-has-host-podantiaffinity
               --ignore-test container-security-context
+              --ignore-test container-resources
               --ignore-test pod-probes
               --ignore-test container-image-tag
               --enable-optional-test container-security-context-privileged
