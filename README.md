@@ -24,17 +24,13 @@ This repo contains helm and YAML for deploying Portainer into a Kubernetes envir
 
 # Deploying with Helm
 
+Ensure you're using at least helm v3.2, which [includes support](https://github.com/helm/helm/pull/7648) for the `--create-namespace` argument.
+
 Install the repository:
 
 ```
 helm repo add portainer https://portainer.github.io/k8s/
 helm repo update
-```
-
-Create the portainer namespace:
-
-```
-kubectl create namespace portainer
 ```
 
 ## Community Edition
@@ -44,20 +40,22 @@ Install the helm chart:
 ### Using NodePort on a local/remote cluster
 
 ```
-helm install -n portainer portainer portainer/portainer
+helm install --create-namespace -n portainer portainer portainer/portainer
 ```
 
 ###  Using a cloud provider's loadbalancer
 
 ```
-helm install -n portainer portainer portainer/portainer --set service.type=LoadBalancer
+helm install --create-namespace -n portainer portainer portainer/portainer \
+--set service.type=LoadBalancer
 ```
 
 
 ### Using ClusterIP with an ingress
 
 ```
-helm install -n portainer portainer portainer/portainer --set service.type=ClusterIP
+helm install --create-namespace -n portainer portainer portainer/portainer \
+--set service.type=ClusterIP
 ```
 
 For advanced helm customization, see the [chart README](/charts/portainer/README.md)
@@ -67,48 +65,45 @@ For advanced helm customization, see the [chart README](/charts/portainer/README
 ### Using NodePort on a local/remote cluster
 
 ```
-helm install --set enterpriseEdition.enabled=true -n portainer portainer portainer/portainer
+helm install --create-namespace -n portainer portainer portainer/portainer \
+--set enterpriseEdition.enabled=true 
 ```
 
 ###  Using a cloud provider's loadbalancer
 
 ```
-helm install  --set enterpriseEdition.enabled=true -n portainer portainer portainer/portainer --set service.type=LoadBalancer
+helm install --create-namespace -n portainer portainer portainer/portainer \
+--set enterpriseEdition.enabled=true  \
+--set service.type=LoadBalancer
 ```
 
 
 ### Using ClusterIP with an ingress
 
 ```
-helm install  --set enterpriseEdition.enabled=true -n portainer portainer portainer/portainer --set service.type=ClusterIP
+helm install --create-namespace -n portainer portainer portainer/portainer \
+--set enterpriseEdition.enabled=true \
+--set service.type=ClusterIP
 ```
 
 For advanced helm customization, see the [chart README](/charts/portainer/README.md)
 
 # Deploying with manifests
 
-If you're not into helm, you can install Portainer using manifests, by first creating the portainer namespace:
-
-```
-kubectl create namespace portainer
-```
-
-And then...
+If you're not using helm, you can install Portainer using manifests directly, as follows
 
 ## Community Edition
 
 ### Using NodePort on a local/remote cluster
 
 ```
-kubectl create namespace portainer
-kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer.yaml
+kubectl apply -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer.yaml
 ```
 
 ###  Using a cloud provider's loadbalancer
 
 ```
-kubectl create namespace portainer
-kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-lb.yaml
+kubectl apply -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-lb.yaml
 ```
 
 ## Enterprise Edition
@@ -116,15 +111,13 @@ kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/ma
 ### Using NodePort on a local/remote cluster
 
 ```
-kubectl create namespace portainer
-kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-ee.yaml
+kubectl apply- f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-ee.yaml
 ```
 
 ###  Using a cloud provider's loadbalancer
 
 ```
-kubectl create namespace portainer
-kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-lb-ee.yaml
+kubectl apply -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-lb-ee.yaml
 ```
 
 # Note re persisting data
