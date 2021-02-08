@@ -16,7 +16,7 @@
 # 3. Remove references to helm in rendered manifests (no point attaching a label like "app.kubernetes.io/managed-by: Helm" if we are not!)
 
 # Create nodeport manifest for ce
-helm install --no-hooks --namespace zorgburger --set service.type=NodePort --set disableTest=true --dry-run zorgburger charts/portainer \
+helm install --no-hooks --namespace zorgburger --set service.type=NodePort --set disableTest=true --set createNamespace=true --dry-run zorgburger charts/portainer \
 | sed -n '1,/NOTES/p' | sed \$d \
 | grep -vE 'NAME|LAST DEPLOYED|NAMESPACE|STATUS|REVISION|HOOKS|MANIFEST|TEST SUITE' \
 | grep -iv helm \
@@ -26,7 +26,7 @@ helm install --no-hooks --namespace zorgburger --set service.type=NodePort --set
 
 
 # Create lb manifest for ce
-helm install --no-hooks --namespace zorgburger --set service.type=LoadBalancer --set disableTest=true --dry-run zorgburger charts/portainer \
+helm install --no-hooks --namespace zorgburger --set service.type=LoadBalancer --set disableTest=true --set createNamespace=true --dry-run zorgburger charts/portainer \
 | sed -n '1,/NOTES/p' | sed \$d \
 | grep -vE 'NAME|LAST DEPLOYED|NAMESPACE|STATUS|REVISION|HOOKS|MANIFEST|TEST SUITE' \
 | grep -iv helm \
@@ -35,7 +35,7 @@ helm install --no-hooks --namespace zorgburger --set service.type=LoadBalancer -
 > deploy/manifests/portainer/portainer-lb.yaml
 
 # Create nodeport manifest for ee
-helm install --no-hooks --namespace zorgburger --set enterpriseEdition.enabled=true --set service.type=NodePort --set disableTest=true --dry-run zorgburger charts/portainer \
+helm install --no-hooks --namespace zorgburger --set enterpriseEdition.enabled=true --set service.type=NodePort --set disableTest=true --set createNamespace=true --dry-run zorgburger charts/portainer \
 | sed -n '1,/NOTES/p' | sed \$d \
 | grep -vE 'NAME|LAST DEPLOYED|NAMESPACE|STATUS|REVISION|HOOKS|MANIFEST|TEST SUITE' \
 | grep -iv helm \
@@ -44,7 +44,7 @@ helm install --no-hooks --namespace zorgburger --set enterpriseEdition.enabled=t
 > deploy/manifests/portainer/portainer-ee.yaml
 
 # Create lb manifest for ee
-helm install --no-hooks --namespace zorgburger --set enterpriseEdition.enabled=true --set service.type=LoadBalancer --set disableTest=true --dry-run zorgburger charts/portainer \
+helm install --no-hooks --namespace zorgburger --set enterpriseEdition.enabled=true --set service.type=LoadBalancer --set disableTest=true --set createNamespace=true --dry-run zorgburger charts/portainer \
 | sed -n '1,/NOTES/p' | sed \$d \
 | grep -vE 'NAME|LAST DEPLOYED|NAMESPACE|STATUS|REVISION|HOOKS|MANIFEST|TEST SUITE' \
 | grep -iv helm \
