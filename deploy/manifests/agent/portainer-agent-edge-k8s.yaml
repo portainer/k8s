@@ -81,8 +81,13 @@ spec:
         - name: EDGE_ID
           valueFrom:
             configMapKeyRef:
-              name: portainer-agent-edge-id
+              name: portainer-agent-edge
               key: edge.id
+        - name: EDGE_INSECURE_POLL
+          valueFrom:
+            configMapKeyRef:
+              name: portainer-agent-edge
+              key: edge.insecure_poll
         - name: EDGE_KEY
           valueFrom:
             secretKeyRef:
