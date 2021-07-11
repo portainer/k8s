@@ -18,9 +18,9 @@ roleRef:
   kind: ClusterRole
   name: cluster-admin
 subjects:
-- kind: ServiceAccount
-  name: portainer-sa-clusteradmin
-  namespace: portainer
+  - kind: ServiceAccount
+    name: portainer-sa-clusteradmin
+    namespace: portainer
 # Optional: can be added to expose the agent port 80 to associate an Edge key.
 # ---
 # apiVersion: v1
@@ -64,37 +64,37 @@ spec:
     spec:
       serviceAccountName: portainer-sa-clusteradmin
       containers:
-      - name: portainer-agent
-        image: portainer/agent:2.7.0
-        imagePullPolicy: Always
-        env:
-        - name: LOG_LEVEL
-          value: INFO
-        - name: KUBERNETES_POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
-        - name: EDGE
-          value: "1"
-        - name: AGENT_CLUSTER_ADDR
-          value: "portainer-agent"
-        - name: EDGE_ID
-          valueFrom:
-            configMapKeyRef:
-              name: portainer-agent-edge
-              key: edge.id
-        - name: EDGE_INSECURE_POLL
-          valueFrom:
-            configMapKeyRef:
-              name: portainer-agent-edge
-              key: edge.insecure_poll
-        - name: EDGE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: portainer-agent-edge-key
-              key: edge.key
-        ports:
-        - containerPort: 9001
-          protocol: TCP
-        - containerPort: 80
-          protocol: TCP
+        - name: portainer-agent
+          image: portainer/agent:2.10.0
+          imagePullPolicy: Always
+          env:
+            - name: LOG_LEVEL
+              value: INFO
+            - name: KUBERNETES_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: EDGE
+              value: "1"
+            - name: AGENT_CLUSTER_ADDR
+              value: "portainer-agent"
+            - name: EDGE_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: portainer-agent-edge
+                  key: edge.id
+            - name: EDGE_INSECURE_POLL
+              valueFrom:
+                configMapKeyRef:
+                  name: portainer-agent-edge
+                  key: edge.insecure_poll
+            - name: EDGE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: portainer-agent-edge-key
+                  key: edge.key
+          ports:
+            - containerPort: 9001
+              protocol: TCP
+            - containerPort: 80
+              protocol: TCP
