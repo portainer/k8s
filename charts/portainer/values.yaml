@@ -9,7 +9,7 @@ enterpriseEdition:
   enabled: false
   image:
     repository: portainer/portainer-ee
-    tag: 2.4.0
+    tag: 2.7.0
     pullPolicy: Always
 
 image:
