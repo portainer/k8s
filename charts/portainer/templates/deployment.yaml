@@ -37,9 +37,15 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- end }}
-      {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
-          args:  [ '--tunnel-port','{{ .Values.service.edgeNodePort }}' ]
-      {{- end }}          
+          args:
+          {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
+            - "--tunnel-port"
+            - "{{ .Values.service.edgeNodePort }}"
+          {{- end }}          
+          {{- if (not (empty .Values.admin.password)) }}
+            - "--admin-password"
+            - "'${ADMIN_PASSWORD_HASH}'"
+          {{- end }}          
           volumeMounts:
             - name: data
               mountPath: /data
@@ -60,3 +66,11 @@ spec:
               port: 9000
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{- if (not (empty .Values.admin.password)) }}
+            - name: ADMIN_PASSWORD_HASH
+              valueFrom:
+                secretKeyRef:
+                  name: portainer-initial-credentials
+                  key: password
+            {{- end }}
