@@ -5,8 +5,8 @@
 replicaCount: 1
 
 admin:
-  user: admin
-  password:
+  username: admin
+  password: 
 
 # If enterpriseEdition is enabled, then use the values below _instead_ of those in .image
 enterpriseEdition: 
