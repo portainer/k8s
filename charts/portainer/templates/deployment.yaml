@@ -25,9 +25,14 @@ spec:
     {{- end }}
       serviceAccountName: {{ include "portainer.serviceAccountName" . }}
       volumes:
-         - name: "data"
-           persistentVolumeClaim:
-             claimName: {{ template "portainer.pvcName" . }}      
+        - name: "data"
+          persistentVolumeClaim:
+            claimName: {{ template "portainer.pvcName" . }}
+      {{- if .Values.tls.existingSecret }}
+        - name: certs
+          secret:
+            secretName: {{ .Values.tls.existingSecret }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- if .Values.enterpriseEdition.enabled }}
@@ -37,16 +42,27 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- end }}
+          args: 
+          - --sslcert=/certs/tls.crt # Always use these paths for cert/key, whether they exist or not
+          - --sslkey=/certs/tls.key  # Always use these paths for cert/key, whether they exist or not
       {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
-          args:  [ '--tunnel-port','{{ .Values.service.edgeNodePort }}' ]
+          - '--tunnel-port={{ .Values.service.edgeNodePort }}'
       {{- end }}          
           volumeMounts:
             - name: data
               mountPath: /data
+            {{- if .Values.tls.existingSecret }}
+            - name: certs
+              mountPath: /certs
+              readOnly: true
+            {{- end }}              
           ports:
             - name: http
               containerPort: 9000
               protocol: TCP
+            - name: https
+              containerPort: 9443
+              protocol: TCP              
             - name: tcp-edge
               containerPort: 8000
               protocol: TCP              
