@@ -120,9 +120,7 @@ spec:
         - name: portainer
           image: "portainer/portainer-ee:2.7.0"
           imagePullPolicy: Always
-          args: 
-          - --sslcert=/certs/tls.crt # Always use these paths for cert/key, whether they exist or not
-          - --sslkey=/certs/tls.key  # Always use these paths for cert/key, whether they exist or not          
+          args:          
           volumeMounts:
             - name: data
               mountPath: /data              
