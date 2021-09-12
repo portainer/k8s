@@ -69,10 +69,12 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: 9000
+              port: 9443
+              scheme: HTTPS
           readinessProbe:
             httpGet:
               path: /
-              port: 9000
+              port: 9443
+              scheme: HTTPS
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
