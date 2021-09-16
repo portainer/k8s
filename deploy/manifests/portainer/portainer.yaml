@@ -77,7 +77,7 @@ spec:
       targetPort: 9443
       protocol: TCP
       name: https
-      nodePort: 30778      
+      nodePort: 30779      
     - port: 30776
       targetPort: 30776
       protocol: TCP
