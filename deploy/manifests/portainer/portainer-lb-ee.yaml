@@ -72,10 +72,6 @@ spec:
       targetPort: 9000
       protocol: TCP
       name: http
-    - port: 9443
-      targetPort: 9443
-      protocol: TCP
-      name: https
     - port: 8000
       targetPort: 8000
       protocol: TCP
@@ -127,7 +123,7 @@ spec:
           ports:
             - name: http
               containerPort: 9000
-              protocol: TCP
+              protocol: TCP              
             - name: tcp-edge
               containerPort: 8000
               protocol: TCP              
