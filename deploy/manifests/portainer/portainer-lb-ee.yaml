@@ -128,22 +128,19 @@ spec:
             - name: http
               containerPort: 9000
               protocol: TCP
-            - name: https
-              containerPort: 9443
-              protocol: TCP              
             - name: tcp-edge
               containerPort: 8000
               protocol: TCP              
           livenessProbe:
             httpGet:
               path: /
-              port: 9443
-              scheme: HTTPS
+              port: 9000
+              scheme: HTTP
           readinessProbe:
             httpGet:
               path: /
-              port: 9443
-              scheme: HTTPS
+              port: 9000
+              scheme: HTTP
           resources:
             {}
 
