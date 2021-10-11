@@ -62,7 +62,7 @@ spec:
             - name: http
               containerPort: 9000
               protocol: TCP
-            {{- if .Values.enterpriseEdition.enabled }}
+            {{- if not .Values.enterpriseEdition.enabled }}
             - name: https
               containerPort: 9443
               protocol: TCP
