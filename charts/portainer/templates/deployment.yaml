@@ -62,26 +62,12 @@ spec:
             - name: http
               containerPort: 9000
               protocol: TCP
-            {{- if not .Values.enterpriseEdition.enabled }}
             - name: https
               containerPort: 9443
-              protocol: TCP
-            {{- end }}                
+              protocol: TCP                
             - name: tcp-edge
               containerPort: 8000
               protocol: TCP              
-          {{- if .Values.enterpriseEdition.enabled }}
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 9000
-              scheme: HTTP
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 9000
-              scheme: HTTP
-          {{- else }}
           livenessProbe:
             httpGet:
               path: /
@@ -91,7 +77,6 @@ spec:
             httpGet:
               path: /
               port: 9443
-              scheme: HTTPS
-          {{- end }}          
+              scheme: HTTPS        
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

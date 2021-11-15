@@ -14,7 +14,7 @@ metadata:
   labels:
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "ce-latest-ee-2.7.0"
+    app.kubernetes.io/version: "ce-latest-ee-2.10.0"
 ---
 # Source: portainer/templates/pvc.yaml
 kind: "PersistentVolumeClaim"
@@ -28,7 +28,7 @@ metadata:
     io.portainer.kubernetes.application.stack: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "ce-latest-ee-2.7.0"
+    app.kubernetes.io/version: "ce-latest-ee-2.10.0"
 spec:
   accessModes:
     - "ReadWriteOnce"
@@ -44,7 +44,7 @@ metadata:
   labels:
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "ce-latest-ee-2.7.0"
+    app.kubernetes.io/version: "ce-latest-ee-2.10.0"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -64,14 +64,18 @@ metadata:
     io.portainer.kubernetes.application.stack: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "ce-latest-ee-2.7.0"
+    app.kubernetes.io/version: "ce-latest-ee-2.10.0"
 spec:
   type: LoadBalancer
   ports:
     - port: 9000
       targetPort: 9000
       protocol: TCP
-      name: http
+      name: http  
+    - port: 9443
+      targetPort: 9443
+      protocol: TCP
+      name: https
     - port: 8000
       targetPort: 8000
       protocol: TCP
@@ -90,7 +94,7 @@ metadata:
     io.portainer.kubernetes.application.stack: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "ce-latest-ee-2.7.0"
+    app.kubernetes.io/version: "ce-latest-ee-2.10.0"
 spec:
   replicas: 1
   strategy:
@@ -114,7 +118,7 @@ spec:
             claimName: portainer
       containers:
         - name: portainer
-          image: "portainer/portainer-ee:2.7.0"
+          image: "portainer/portainer-ee:2.10.0"
           imagePullPolicy: Always
           args:          
           volumeMounts:
@@ -123,20 +127,23 @@ spec:
           ports:
             - name: http
               containerPort: 9000
-              protocol: TCP              
+              protocol: TCP
+            - name: https
+              containerPort: 9443
+              protocol: TCP                
             - name: tcp-edge
               containerPort: 8000
               protocol: TCP              
           livenessProbe:
             httpGet:
               path: /
-              port: 9000
-              scheme: HTTP
+              port: 9443
+              scheme: HTTPS
           readinessProbe:
             httpGet:
               path: /
-              port: 9000
-              scheme: HTTP
+              port: 9443
+              scheme: HTTPS        
           resources:
             {}
 
