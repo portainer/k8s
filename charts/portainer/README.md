@@ -77,6 +77,8 @@ The following table lists the configurable parameters of the Portainer chart and
 | `ingress.hosts.paths.port` | Port for the Portainer Web. | `9000` |
 | `ingress.tls` | TLS support on ingress. Must create a secret with TLS certificates in advance | `[]` |
 | `resources` | Portainer resource requests and limits | `{}` |
+| `tls.force` | Force Portainer to be configured to use TLS only | `false` |
+| `tls.existingSecret` | Mount the existing TLS secret into the pod | `""` |
 | `persistence.enabled` | Whether to enable data persistence | `true` |
 | `persistence.existingClaim` | Name of an existing PVC to use for data persistence | `nil` |
 | `persistence.size` | Size of the PVC used for persistence | `10Gi` |
@@ -84,5 +86,3 @@ The following table lists the configurable parameters of the Portainer chart and
 | `persistence.storageClass` | StorageClass to apply to PVC used for persistence | `default` |
 | `persistence.accessMode` | AccessMode for persistence | `ReadWriteOnce` |
 | `persistence.selector` | Selector for persistence | `nil` |
-
-

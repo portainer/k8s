@@ -43,13 +43,16 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- end }}
           args: 
-      {{- if .Values.tls.existingSecret }}
+          {{- if .Values.tls.force }}
+          - --http-disabled
+          {{- end }}
+          {{- if .Values.tls.existingSecret }}
           - --sslcert=/certs/tls.crt
           - --sslkey=/certs/tls.key
-      {{- end }}
-      {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
+          {{- end }}
+          {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
           - '--tunnel-port={{ .Values.service.edgeNodePort }}'
-      {{- end }}          
+          {{- end }}          
           volumeMounts:
             - name: data
               mountPath: /data
@@ -57,26 +60,38 @@ spec:
             - name: certs
               mountPath: /certs
               readOnly: true
-            {{- end }}              
+            {{- end }}
           ports:
+            {{- if not .Values.tls.force }}
             - name: http
               containerPort: 9000
               protocol: TCP
+            {{- end }}
             - name: https
               containerPort: 9443
-              protocol: TCP                
+              protocol: TCP
             - name: tcp-edge
               containerPort: 8000
-              protocol: TCP              
+              protocol: TCP
           livenessProbe:
             httpGet:
               path: /
+              {{- if .Values.tls.force }}
               port: 9443
               scheme: HTTPS
+              {{- else }}
+              port: 9000
+              scheme: HTTP
+              {{- end }}
           readinessProbe:
             httpGet:
               path: /
+              {{- if .Values.tls.force }}
               port: 9443
-              scheme: HTTPS        
+              scheme: HTTPS
+              {{- else }}
+              port: 9000
+              scheme: HTTP
+              {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
