@@ -39,6 +39,8 @@ service:
   annotations: {}
 
 tls:
+  # If set, Portainer will be configured to use TLS only
+  force: false
   # If set, will mount the existing secret into the pod
   existingSecret: ""
 
