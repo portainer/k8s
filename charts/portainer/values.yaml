@@ -44,6 +44,9 @@ tls:
   # If set, will mount the existing secret into the pod
   existingSecret: ""
 
+feature:
+  flags: ""
+
 ingress:
   enabled: false
   annotations: {}

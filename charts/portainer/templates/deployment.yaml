@@ -18,17 +18,17 @@ spec:
       labels:
         {{- include "portainer.selectorLabels" . | nindent 8 }}
     spec:
-      nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 -}}      
-    {{- with .Values.imagePullSecrets }}
+      nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 -}}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
       serviceAccountName: {{ include "portainer.serviceAccountName" . }}
       volumes:
         - name: "data"
           persistentVolumeClaim:
             claimName: {{ template "portainer.pvcName" . }}
-      {{- if .Values.tls.existingSecret }}
+        {{- if .Values.tls.existingSecret }}
         - name: certs
           secret:
             secretName: {{ .Values.tls.existingSecret }}
@@ -52,7 +52,10 @@ spec:
           {{- end }}
           {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
           - '--tunnel-port={{ .Values.service.edgeNodePort }}'
-          {{- end }}          
+          {{- end }}
+          {{- if (not (empty .Values.feature.flags)) }}
+          - '{{ .Values.feature.flags }}'
+          {{- end }}
           volumeMounts:
             - name: data
               mountPath: /data
