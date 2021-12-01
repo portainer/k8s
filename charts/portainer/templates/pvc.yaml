@@ -4,7 +4,7 @@ kind: "PersistentVolumeClaim"
 apiVersion: "v1"
 metadata:
   name: {{ template "portainer.fullname" . }}
-  namespace: {{ .Release.Namespace }}  
+  namespace: {{ .Release.Namespace }}
   annotations:
   {{- if .Values.persistence.storageClass }}
     volume.beta.kubernetes.io/storage-class: {{ .Values.persistence.storageClass | quote }}
@@ -16,7 +16,7 @@ metadata:
   {{ end }}
   labels:
     io.portainer.kubernetes.application.stack: portainer
-    {{- include "portainer.labels" . | nindent 4 }}  
+    {{- include "portainer.labels" . | nindent 4 }}
 spec:
   accessModes:
     - {{ default "ReadWriteOnce" .Values.persistence.accessMode | quote }}
