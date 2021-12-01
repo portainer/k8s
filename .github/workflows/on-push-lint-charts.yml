@@ -4,7 +4,10 @@ on:
   push:
     paths:
       - 'charts/**' 
-      - '.github/**'            
+      - '.github/**'
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
 
 env:
