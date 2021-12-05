@@ -46,6 +46,8 @@ tls:
 
 ingress:
   enabled: false
+  # Allows setting of the ingress class in newer ingress controllers
+  ingressClassName:
   annotations: {}
 #    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
   hosts:
