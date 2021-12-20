@@ -35,7 +35,7 @@ spec:
               service:
                 name: {{ $fullName }}
                 port: 
-                  number: {{ .port | default 9000 }}
+                  number: {{ .port | default 9443 }}
         {{- end }}
   {{- end }}
 {{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -70,7 +70,7 @@ spec:
           - path: {{ .path | default "/" }}
             backend:
               serviceName: {{ $fullName }}
-              servicePort: {{ .port | default 9000 }}
+              servicePort: {{ .port | default 9443 }}
         {{- end }}
   {{- end }}
 {{- else -}}
@@ -105,7 +105,7 @@ spec:
           - path: {{ .path | default "/" }}
             backend:
               serviceName: {{ $fullName }}
-              servicePort: {{ .port | default 9000 }}
+              servicePort: {{ .port | default 9443 }}
         {{- end }}
   {{- end }}
 {{- end }}
