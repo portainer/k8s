@@ -31,7 +31,7 @@ spec:
         {{- range .paths }}
           - path: {{ .path | default "/" }}
             pathType: Prefix
-            defaultBackend:
+            backend:
               service:
                 name: {{ $fullName }}
                 port: 
