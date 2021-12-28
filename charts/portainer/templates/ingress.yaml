@@ -1,9 +1,10 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "portainer.fullname" . -}}
-{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
+{{- $kubeVersion := .Capabilities.KubeVersion.GitVersion -}}
+{{- if semverCompare ">=1.19-0" $kubeVersion -}}
+apiVersion: networking.k8s.io/v1
 {{- else -}}
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta
 {{- end }}
 kind: Ingress
 metadata:
@@ -31,11 +32,19 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
-        {{- range .paths }}
-          - path: {{ .path | default "/" }}
-            backend:
-              serviceName: {{ $fullName }}
-              servicePort: {{ .port | default 9000 }}
-        {{- end }}
+        - path: {{ .path }}
+          {{- if semverCompare ">=1.18-0" $kubeVersion }}
+          pathType: ImplementationSpecific
+          {{- end }}
+          backend:
+            {{- if semverCompare ">=1.19-0" $kubeVersion }}
+            service:
+              name: {{ $fullName }}
+              port:
+                number: {{ .port | default 9000 }}
+            {{- else -}}
+            serviceName: {{ $fullName }}
+            servicePort: {{ .port | default 9000 }}
+            {{- end }}
   {{- end }}
 {{- end }}
