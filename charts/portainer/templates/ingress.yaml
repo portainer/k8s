@@ -1,8 +1,14 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "portainer.fullname" . -}}
-{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 {{- $tlsforced := .Values.tls.force }}
+{{- $kubeVersion := .Capabilities.KubeVersion.GitVersion -}}
+{{- if semverCompare ">=1.19-0" $kubeVersion -}}
 apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" $kubeVersion -}}}
+apiVersion: networking.k8s.io/v1beta
+{{-else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -31,6 +37,7 @@ spec:
         paths:
         {{- range .paths }}
           - path: {{ .path | default "/" }}
+          {{- if semverCompare ">=1.19-0" $kubeVersion -}}
             pathType: Prefix
             backend:
               service:
@@ -41,38 +48,7 @@ spec:
                 {{- else }}
                   number: {{ .port | default 9000 }}
                 {{- end }}
-        {{- end }}
-  {{- end }}
-{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: {{ $fullName }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "portainer.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
-spec:
-{{- if .Values.ingress.tls }}
-  tls:
-  {{- range .Values.ingress.tls }}
-    - hosts:
-      {{- range .hosts }}
-        - {{ . | quote }}
-      {{- end }}
-      secretName: {{ .secretName }}
-  {{- end }}
-{{- end }}
-  rules:
-  {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
-        paths:
-        {{- range .paths }}
-          - path: {{ .path | default "/" }}
+          {{- else -}}
             backend:
               serviceName: {{ $fullName }}
               {{- if $tlsforced }}
@@ -80,45 +56,7 @@ spec:
               {{- else }}
               servicePort: {{ .port | default 9000 }}
               {{- end }}
-        {{- end }}
-  {{- end }}
-{{- else -}}
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: {{ $fullName }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "portainer.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
-spec:
-{{- if .Values.ingress.tls }}
-  tls:
-  {{- range .Values.ingress.tls }}
-    - hosts:
-      {{- range .hosts }}
-        - {{ . | quote }}
-      {{- end }}
-      secretName: {{ .secretName }}
-  {{- end }}
-{{- end }}
-  rules:
-  {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
-        paths:
-        {{- range .paths }}
-          - path: {{ .path | default "/" }}
-            backend:
-              serviceName: {{ $fullName }}
-              {{- if $tlsforced }}
-              servicePort: {{ .port | default 9443 }}
-              {{- else }}
-              servicePort: {{ .port | default 9000 }}
-              {{- end }}
+          {{- end }}
         {{- end }}
   {{- end }}
 {{- end }}
