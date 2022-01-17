@@ -37,7 +37,7 @@ spec:
                 port: 
                 {{- if .Values.tls.force }}
                   number: {{ .port | default 9443 }}
-                {{- else -}}
+                {{- else }}
                   number: {{ .port | default 9000 }}
                 {{- end }}
         {{- end }}
@@ -76,7 +76,7 @@ spec:
               serviceName: {{ $fullName }}
             {{- if .Values.tls.force }}
               servicePort: {{ .port | default 9443 }}
-            {{- else -}}
+            {{- else }}
               servicePort: {{ .port | default 9000 }}
             {{- end }}
         {{- end }}
@@ -115,7 +115,7 @@ spec:
               serviceName: {{ $fullName }}
             {{- if .Values.tls.force }}
               servicePort: {{ .port | default 9443 }}
-            {{- else -}}
+            {{- else }}
               servicePort: {{ .port | default 9000 }}
             {{- end }}
         {{- end }}
