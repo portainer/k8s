@@ -35,11 +35,11 @@ spec:
               service:
                 name: {{ $fullName }}
                 port: 
-                {{- if .Values.tls.force }}
+                  {{- if .Values.tls.force }}
                   number: {{ .port | default 9443 }}
-                {{- else }}
+                  {{- else }}
                   number: {{ .port | default 9000 }}
-                {{- end }}
+                  {{- end }}
         {{- end }}
   {{- end }}
 {{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -74,11 +74,11 @@ spec:
           - path: {{ .path | default "/" }}
             backend:
               serviceName: {{ $fullName }}
-            {{- if .Values.tls.force }}
+              {{- if .Values.tls.force }}
               servicePort: {{ .port | default 9443 }}
-            {{- else }}
+              {{- else }}
               servicePort: {{ .port | default 9000 }}
-            {{- end }}
+              {{- end }}
         {{- end }}
   {{- end }}
 {{- else -}}
@@ -113,11 +113,11 @@ spec:
           - path: {{ .path | default "/" }}
             backend:
               serviceName: {{ $fullName }}
-            {{- if .Values.tls.force }}
+              {{- if .Values.tls.force }}
               servicePort: {{ .port | default 9443 }}
-            {{- else }}
+              {{- else }}
               servicePort: {{ .port | default 9000 }}
-            {{- end }}
+              {{- end }}
         {{- end }}
   {{- end }}
 {{- end }}
