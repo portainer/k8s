@@ -1,6 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "portainer.fullname" . -}}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
+{{- $tlsforced := .Values.tls.force }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -35,7 +36,7 @@ spec:
               service:
                 name: {{ $fullName }}
                 port: 
-                {{- if .Values.tls.force }}
+                {{- if $tlsforced }}
                   number: {{ .port | default 9443 }}
                 {{- else }}
                   number: {{ .port | default 9000 }}
@@ -74,7 +75,7 @@ spec:
           - path: {{ .path | default "/" }}
             backend:
               serviceName: {{ $fullName }}
-              {{- if .Values.tls.force }}
+              {{- if $tlsforced }}
               servicePort: {{ .port | default 9443 }}
               {{- else }}
               servicePort: {{ .port | default 9000 }}
@@ -113,7 +114,7 @@ spec:
           - path: {{ .path | default "/" }}
             backend:
               serviceName: {{ $fullName }}
-              {{- if .Values.tls.force }}
+              {{- if $tlsforced }}
               servicePort: {{ .port | default 9443 }}
               {{- else }}
               servicePort: {{ .port | default 9000 }}
