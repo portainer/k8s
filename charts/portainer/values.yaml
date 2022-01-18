@@ -49,8 +49,11 @@ feature:
 
 ingress:
   enabled: false
+  ingressClassName: ""
   annotations: {}
-#    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    # kubernetes.io/ingress.class: nginx
+    # Only use below if tls.force=true
+    # nginx.ingress.kubernetes.io/backend-protocol: HTTPS
   hosts:
     - host:
       paths: []
