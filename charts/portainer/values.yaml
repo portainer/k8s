@@ -54,9 +54,11 @@ ingress:
     # kubernetes.io/ingress.class: nginx
     # Only use below if tls.force=true
     # nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+  # Note: Hosts and paths are of type array
   hosts:
     - host:
       paths: []
+      # - path: "/"
   tls: []
 
 resources: {}
