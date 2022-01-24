@@ -72,6 +72,7 @@ The following table lists the configurable parameters of the Portainer chart and
 | `service.annotations` | Annotations to add to the service | `{}` |
 | `feature.flags` | Enable one or more features separated by spaces. For instance, `--feat=open-amt` | `nil` |
 | `ingress.enabled` | Create an ingress for Portainer | `false` |
+| `ingress.ingressClassName` | For Kubernetes >= 1.18 you should specify the ingress-controller via the field `ingressClassName`. For instance, `nginx` | `nil` |
 | `ingress.annotations` | Annotations to add to the ingress. For instane, `kubernetes.io/ingress.class: nginx` | `{}` |
 | `ingress.hosts.host` | URL for Portainer Web. For instance, `portainer.example.io` | `nil` |
 | `ingress.hosts.paths.path` | Path for the Portainer Web. | `/` |
