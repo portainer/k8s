@@ -42,14 +42,14 @@ spec:
               service:
                 name: {{ $fullName }}
                 port:
-                {{- if $tlsforced }}
+                {{- if eq $tlsforced true }}
                   number: {{ .port | default 9443 }}
                 {{- else }}
                   number: {{ .port | default 9000 }}
                 {{- end }}
             {{- else }}
               serviceName: {{ $fullName }}
-              {{- if $tlsforced }}
+              {{- if eq $tlsforced true }}
               servicePort: {{ .port | default 9443 }}
               {{- else }}
               servicePort: {{ .port | default 9000 }}
