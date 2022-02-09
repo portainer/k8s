@@ -47,7 +47,7 @@ errorAndExit() {
 main() {
   if [[ $# -lt 2 ]]; then
     error "Not enough arguments"
-    error "Usage: ${0} <EDGE_ID> <EDGE_KEY> <EDGE_INSECURE_POLL:optional> <ENV_SOURCE:optional>"
+    error "Usage: ${0} <EDGE_ID> <EDGE_KEY> <EDGE_INSECURE_POLL> <ENV_SOURCE:optional>"
     exit 1
   fi
 
