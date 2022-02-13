@@ -67,9 +67,6 @@ spec:
       - name: portainer-agent
         image: portainer/agent:2.11.1
         imagePullPolicy: Always
-        envFrom:
-        - configMapRef:
-          name: portainer-agent-edge
         env:
         - name: LOG_LEVEL
           value: INFO
@@ -86,6 +83,9 @@ spec:
             secretKeyRef:
               name: portainer-agent-edge-key
               key: edge.key
+        envFrom:
+        - configMapRef:
+          name: portainer-agent-edge
         ports:
         - containerPort: 9001
           protocol: TCP
