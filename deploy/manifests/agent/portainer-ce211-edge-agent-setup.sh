@@ -66,12 +66,12 @@ main() {
   kubectl create namespace portainer
 
   info "Creating agent configuration..."
-  cmd="kubectl create configmap -n portainer portainer-agent-edge --from-literal=\"edge.id=$EDGE_ID\" --from-literal=\"edge.insecure_poll=$EDGE_INSECURE_POLL\""
+  cmd="kubectl create configmap -n portainer portainer-agent-edge --from-literal=EDGE_ID=$EDGE_ID --from-literal=EDGE_INSECURE_POLL=$EDGE_INSECURE_POLL"
 
   env_array=(${ENV_SOURCE//,/ })
   for env in "${env_array[@]}"
   do
-    tmp=" \"--from-literal=$env\""
+    tmp=" --from-literal=$env="
     cmd=$cmd$tmp
   done
 
