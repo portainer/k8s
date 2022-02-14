@@ -75,7 +75,7 @@ main() {
     cmd=$cmd$tmp
   done
 
-  $($cmd)
+  eval $cmd || errorAndExit "Unable to create agent configuration"
 
   info "Creating agent secret..."
   kubectl create secret generic portainer-agent-edge-key "--from-literal=edge.key=$EDGE_KEY" -n portainer
