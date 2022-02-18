@@ -33,6 +33,11 @@ spec:
           secret:
             secretName: {{ .Values.tls.existingSecret }}
         {{- end }}
+        {{- if .Values.dbEncryption.enabled }}
+        - name: db-encryption-key
+          secret:
+            secretName: {{ .Values.dbEncryption.secret }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- if .Values.enterpriseEdition.enabled }}
@@ -63,6 +68,11 @@ spec:
             - name: certs
               mountPath: /certs
               readOnly: true
+            {{- end }}
+            {{- if .Values.dbEncryption.enabled }}
+            - name: db-encryption-key
+              mountPath: "/run/secrets/portainer"
+              subPath: portainer
             {{- end }}
           ports:
             {{- if not .Values.tls.force }}
