@@ -78,14 +78,21 @@ spec:
           value: "1"
         - name: AGENT_CLUSTER_ADDR
           value: "portainer-agent"
+        - name: EDGE_ID
+          valueFrom:
+            configMapKeyRef:
+              name: portainer-agent-edge
+              key: edge.id
+        - name: EDGE_INSECURE_POLL
+          valueFrom:
+            configMapKeyRef:
+              name: portainer-agent-edge
+              key: edge.insecure_poll
         - name: EDGE_KEY
           valueFrom:
             secretKeyRef:
               name: portainer-agent-edge-key
               key: edge.key
-        envFrom:
-        - configMapRef:
-            name: portainer-agent-edge
         ports:
         - containerPort: 9001
           protocol: TCP

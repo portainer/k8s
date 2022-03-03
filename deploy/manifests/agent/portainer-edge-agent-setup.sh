@@ -45,16 +45,11 @@ errorAndExit() {
 ### !COLOR OUTPUT ###
 
 main() {
-  if [[ $# -lt 2 ]]; then
+  if [[ $# -ne 2 ]]; then
     error "Not enough arguments"
-    error "Usage: ${0} <EDGE_ID> <EDGE_KEY> <EDGE_INSECURE_POLL> <ENV_SOURCE:optional>"
+    error "Usage: ${0} <EDGE_ID> <EDGE_KEY>"
     exit 1
   fi
-
-  local EDGE_ID="$1"
-  local EDGE_KEY="$2"
-  local EDGE_INSECURE_POLL="$3"
-  local ENV_SOURCE="$4"
 
   [[ "$(command -v curl)" ]] || errorAndExit "Unable to find curl binary. Please ensure curl is installed before running this script."
   [[ "$(command -v kubectl)" ]] || errorAndExit "Unable to find kubectl binary. Please ensure kubectl is installed before running this script."
@@ -66,19 +61,10 @@ main() {
   kubectl create namespace portainer
 
   info "Creating agent configuration..."
-  cmd="kubectl create configmap -n portainer portainer-agent-edge --from-literal=EDGE_ID=$EDGE_ID --from-literal=EDGE_INSECURE_POLL=$EDGE_INSECURE_POLL"
-
-  env_array=(${ENV_SOURCE//,/ })
-  for env in "${env_array[@]}"
-  do
-    tmp=" --from-literal=$env="
-    cmd=$cmd$tmp
-  done
-
-  eval $cmd || errorAndExit "Unable to create agent configuration"
+  kubectl create configmap portainer-agent-edge-id "--from-literal=edge.id=$1" -n portainer
 
   info "Creating agent secret..."
-  kubectl create secret generic portainer-agent-edge-key "--from-literal=edge.key=$EDGE_KEY" -n portainer
+  kubectl create secret generic portainer-agent-edge-key "--from-literal=edge.key=$2" -n portainer
 
   info "Deploying agent..."
   kubectl apply -f portainer-agent-edge-k8s.yaml || errorAndExit "Unable to deploy agent manifest"

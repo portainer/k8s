@@ -47,35 +47,25 @@ errorAndExit() {
 main() {
   if [[ $# -lt 2 ]]; then
     error "Not enough arguments"
-    error "Usage: ${0} <EDGE_ID> <EDGE_KEY> <EDGE_INSECURE_POLL> <ENV_SOURCE:optional>"
+    error "Usage: ${0} <EDGE_ID> <EDGE_KEY> <EDGE_INSECURE_POLL:optional>"
     exit 1
   fi
 
   local EDGE_ID="$1"
   local EDGE_KEY="$2"
   local EDGE_INSECURE_POLL="$3"
-  local ENV_SOURCE="$4"
 
   [[ "$(command -v curl)" ]] || errorAndExit "Unable to find curl binary. Please ensure curl is installed before running this script."
   [[ "$(command -v kubectl)" ]] || errorAndExit "Unable to find kubectl binary. Please ensure kubectl is installed before running this script."
 
   info "Downloading agent manifest..."
-  curl -L https://raw.githubusercontent.com/portainer/k8s/4439f8adfc3643be35dc65001c294591bac79703/deploy/manifests/agent/portainer-ce211-agent-edge-k8s.yaml -o portainer-agent-edge-k8s.yaml || errorAndExit "Unable to download agent manifest"
+  curl -L https://portainer.github.io/k8s/deploy/manifests/agent/portainer-ce211-agent-edge-k8s.yaml -o portainer-agent-edge-k8s.yaml || errorAndExit "Unable to download agent manifest"
 
   info "Creating Portainer namespace..."
   kubectl create namespace portainer
 
   info "Creating agent configuration..."
-  cmd="kubectl create configmap -n portainer portainer-agent-edge --from-literal=EDGE_ID=$EDGE_ID --from-literal=EDGE_INSECURE_POLL=$EDGE_INSECURE_POLL"
-
-  env_array=(${ENV_SOURCE//,/ })
-  for env in "${env_array[@]}"
-  do
-    tmp=" --from-literal=$env="
-    cmd=$cmd$tmp
-  done
-
-  eval $cmd || errorAndExit "Unable to create agent configuration"
+  kubectl create configmap portainer-agent-edge --from-literal="edge.id=$EDGE_ID" --from-literal="edge.insecure_poll=$EDGE_INSECURE_POLL"  -n portainer
 
   info "Creating agent secret..."
   kubectl create secret generic portainer-agent-edge-key "--from-literal=edge.key=$EDGE_KEY" -n portainer
