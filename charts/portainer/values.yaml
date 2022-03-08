@@ -47,6 +47,13 @@ tls:
 feature:
   flags: ""
 
+dbEncryption:
+  # If set, Portainer will encrypt the database
+  enabled: false
+  # If enabled, the following secret will be mounted into the pod for the database encryption
+  # Ensure to pre-create the secret in the cluster
+  secret: ""
+
 ingress:
   enabled: false
   ingressClassName: ""
