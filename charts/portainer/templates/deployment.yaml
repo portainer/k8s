@@ -83,8 +83,13 @@ spec:
               port: 9443
               scheme: HTTPS
               {{- else }}
+                {{- if .Values.service.httpsPort }}
+              port: 9443
+              scheme: HTTPS
+                {{- else }}
               port: 9000
               scheme: HTTP
+                {{- end }}
               {{- end }}
           readinessProbe:
             httpGet:
@@ -93,8 +98,13 @@ spec:
               port: 9443
               scheme: HTTPS
               {{- else }}
+                {{- if .Values.service.httpsPort }}
+              port: 9443
+              scheme: HTTPS
+                {{- else }}
               port: 9000
               scheme: HTTP
+                {{- end }}
               {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
