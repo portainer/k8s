@@ -83,12 +83,25 @@ spec:
               port: 9443
               scheme: HTTPS
               {{- else }}
-                {{- if .Values.service.httpsPort }}
+                {{- if .Values.enterpriseEdition.enabled }}
+                  {{- if eq (semver .Values.enterpriseEdition.image.tag | (semver "2.7.0").Compare) -1 }}
               port: 9443
               scheme: HTTPS
-                {{- else }}
+                  {{- else }}
               port: 9000
               scheme: HTTP
+                  {{- end}}
+                {{- else }}
+                  {{- if eq .Values.image.tag "latest" }}
+              port: 9443
+              scheme: HTTPS
+                  {{- else if eq (semver .Values.image.tag | (semver "2.6.0").Compare) -1 }}
+              port: 9443
+              scheme: HTTPS
+                  {{- else }}
+              port: 9000
+              scheme: HTTP
+                  {{- end }}
                 {{- end }}
               {{- end }}
           readinessProbe:
@@ -98,12 +111,25 @@ spec:
               port: 9443
               scheme: HTTPS
               {{- else }}
-                {{- if .Values.service.httpsPort }}
+                {{- if .Values.enterpriseEdition.enabled }}
+                  {{- if eq (semver .Values.enterpriseEdition.image.tag | (semver "2.7.0").Compare) -1 }}
               port: 9443
               scheme: HTTPS
-                {{- else }}
+                  {{- else }}
               port: 9000
               scheme: HTTP
+                  {{- end }}
+                {{- else }}
+                  {{- if eq .Values.image.tag "latest" }}
+              port: 9443
+              scheme: HTTPS
+                  {{- else if eq (semver .Values.image.tag | (semver "2.6.0").Compare) -1 }}
+              port: 9443
+              scheme: HTTPS
+                  {{- else }}
+              port: 9000
+              scheme: HTTP
+                  {{- end }}
                 {{- end }}
               {{- end }}
           resources:
