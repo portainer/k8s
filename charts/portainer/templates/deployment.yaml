@@ -92,15 +92,22 @@ spec:
               scheme: HTTP
                   {{- end}}
                 {{- else }}
-                  {{- if eq .Values.image.tag "latest" }}
+                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.image.tag }}
+                    {{- if eq (semver .Values.image.tag | (semver "2.6.0").Compare) -1 }}
               port: 9443
               scheme: HTTPS
-                  {{- else if eq (semver .Values.image.tag | (semver "2.6.0").Compare) -1 }}
-              port: 9443
-              scheme: HTTPS
-                  {{- else }}
+                    {{- else }}
               port: 9000
               scheme: HTTP
+                    {{- end}}
+                  {{- else }}
+                    {{- if eq .Values.image.tag "latest" }}
+              port: 9443
+              scheme: HTTPS
+                    {{- else }}
+              port: 9000
+              scheme: HTTP
+                    {{- end }}
                   {{- end }}
                 {{- end }}
               {{- end }}
@@ -120,15 +127,22 @@ spec:
               scheme: HTTP
                   {{- end }}
                 {{- else }}
-                  {{- if eq .Values.image.tag "latest" }}
+                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.image.tag }}
+                    {{- if eq (semver .Values.image.tag | (semver "2.6.0").Compare) -1 }}
               port: 9443
               scheme: HTTPS
-                  {{- else if eq (semver .Values.image.tag | (semver "2.6.0").Compare) -1 }}
-              port: 9443
-              scheme: HTTPS
-                  {{- else }}
+                    {{- else }}
               port: 9000
               scheme: HTTP
+                    {{- end}}
+                  {{- else }}
+                    {{- if eq .Values.image.tag "latest" }}
+              port: 9443
+              scheme: HTTPS
+                    {{- else }}
+              port: 9000
+              scheme: HTTP
+                    {{- end }}
                   {{- end }}
                 {{- end }}
               {{- end }}
