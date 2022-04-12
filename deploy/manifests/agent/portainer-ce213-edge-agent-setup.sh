@@ -22,31 +22,31 @@ Cya="$ESeq"'0;36m';     BCya="$ESeq"'1;36m';    UCya="$ESeq"'4;36m';    ICya="$E
 Whi="$ESeq"'0;37m';     BWhi="$ESeq"'1;37m';    UWhi="$ESeq"'4;37m';    IWhi="$ESeq"'0;97m';    BIWhi="$ESeq"'1;97m';   On_Whi="$ESeq"'47m';    On_IWhi="$ESeq"'0;107m';
 
 printSection() {
-  echo -e "${BIYel}>>>> ${BIWhi}${1}${RCol}"
+    echo -e "${BIYel}>>>> ${BIWhi}${1}${RCol}"
 }
 
 info() {
-  echo -e "${BIWhi}${1}${RCol}"
+    echo -e "${BIWhi}${1}${RCol}"
 }
 
 success() {
-  echo -e "${BIGre}${1}${RCol}"
+    echo -e "${BIGre}${1}${RCol}"
 }
 
 error() {
-  echo -e "${BIRed}${1}${RCol}"
+    echo -e "${BIRed}${1}${RCol}"
 }
 
 errorAndExit() {
-  echo -e "${BIRed}${1}${RCol}"
-  exit 1
+    echo -e "${BIRed}${1}${RCol}"
+    exit 1
 }
 
 ### !COLOR OUTPUT ###
 
 parseEnvVars() {
   envs=""
-  ENV_SOURCE=$1
+  local ENV_SOURCE=$1
   IFS="," read -r -a env_array <<< "$ENV_SOURCE"
   for env in "${env_array[@]}"
   do
@@ -59,42 +59,49 @@ parseEnvVars() {
 }
 
 main() {
-  if [[ $# -lt 2 ]]; then
-    error "Not enough arguments"
-    error "Usage: ${0} <EDGE_ID> <EDGE_KEY> <EDGE_INSECURE_POLL> <ENV_SOURCE:optional>"
-    exit 1
-  fi
+    if [[ $# -lt 2 ]]; then
+        error "Not enough arguments"
+        error "Usage: ${0} <EDGE_ID> <EDGE_KEY> <EDGE_INSECURE_POLL> <EDGE_SECRET:optional>"
+        exit 1
+    fi
+    
+    local EDGE_ID="$1"
+    local EDGE_KEY="$2"
+    local EDGE_INSECURE_POLL="$3"
+    local EDGE_SECRET="$4"
+    local ENV_SOURCE="$5"
+    
+    [[ "$(command -v curl)" ]] || errorAndExit "Unable to find curl binary. Please ensure curl is installed before running this script."
+    [[ "$(command -v kubectl)" ]] || errorAndExit "Unable to find kubectl binary. Please ensure kubectl is installed before running this script."
+    
+    info "Downloading agent manifest..."
+    curl -L  https://downloads.portainer.io/ce213/portainer-agent-edge-k8s.yaml -o portainer-agent-edge-k8s.yaml || errorAndExit "Unable to download agent manifest"
+    
+    info "Creating Portainer namespace..."
+    kubectl create namespace portainer
+    
+    info "Creating agent configuration..."
+    configmapCmd="kubectl create configmap -n portainer portainer-agent-edge"
+    configmapCmd+=" --from-literal="EDGE_ID=$EDGE_ID""
+    configmapCmd+=" --from-literal="EDGE_INSECURE_POLL=$EDGE_INSECURE_POLL""
+    if [ -n "$EDGE_SECRET" ]; then
+        configmapCmd+=" --from-literal="EDGE_SECRET=$EDGE_SECRET""
+    fi
+    
+    if [[ -n "$ENV_SOURCE" ]]; then
+        configmapCmd="$configmapCmd $(parseEnvVars "$ENV_SOURCE")"
+    fi
+    echo "$configmapCmd"
+    $configmapCmd
 
-  local EDGE_ID="$1"
-  local EDGE_KEY="$2"
-  local EDGE_INSECURE_POLL="$3"
-  local ENV_SOURCE="$4"
-
-  [[ "$(command -v curl)" ]] || errorAndExit "Unable to find curl binary. Please ensure curl is installed before running this script."
-  [[ "$(command -v kubectl)" ]] || errorAndExit "Unable to find kubectl binary. Please ensure kubectl is installed before running this script."
-
-  info "Downloading agent manifest..."
-  curl -L https://raw.githubusercontent.com/portainer/k8s/feat/EE-2436/source-env-vars/deploy/manifests/agent/portainer-ce211-agent-edge-k8s.yaml -o portainer-agent-edge-k8s.yaml || errorAndExit "Unable to download agent manifest"
-
-  info "Creating Portainer namespace..."
-  kubectl create namespace portainer
-
-  info "Creating agent configuration..."
-  cmd="kubectl create configmap -n portainer portainer-agent-edge --from-literal=EDGE_ID=$EDGE_ID --from-literal=EDGE_INSECURE_POLL=$EDGE_INSECURE_POLL"
-
-  if [[ -n "$ENV_SOURCE" ]]; then
-    cmd="$cmd $(parseEnvVars "$ENV_SOURCE")"
-  fi
-  eval "$cmd"
-
-  info "Creating agent secret..."
-  kubectl create secret generic portainer-agent-edge-key "--from-literal=edge.key=$EDGE_KEY" -n portainer
-
-  info "Deploying agent..."
-  kubectl apply -f portainer-agent-edge-k8s.yaml || errorAndExit "Unable to deploy agent manifest"
-
-  success "Portainer Edge agent successfully deployed"
-  exit 0
+    info "Creating agent secret..."
+    kubectl create secret generic portainer-agent-edge-key "--from-literal=edge.key=$EDGE_KEY" -n portainer
+    
+    info "Deploying agent..."
+    kubectl apply -f portainer-agent-edge-k8s.yaml || errorAndExit "Unable to deploy agent manifest"
+    
+    success "Portainer Edge agent successfully deployed"
+    exit 0
 }
 
 main "$@"
