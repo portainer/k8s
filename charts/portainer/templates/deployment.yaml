@@ -25,9 +25,11 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "portainer.serviceAccountName" . }}
       volumes:
+        {{- if .Values.persistence.enabled }}
         - name: "data"
           persistentVolumeClaim:
             claimName: {{ template "portainer.pvcName" . }}
+        {{- end }}
         {{- if .Values.tls.existingSecret }}
         - name: certs
           secret:
@@ -57,8 +59,10 @@ spec:
           - '{{ .Values.feature.flags }}'
           {{- end }}
           volumeMounts:
+            {{- if .Values.persistence.enabled }}
             - name: data
               mountPath: /data
+            {{- end }}
             {{- if .Values.tls.existingSecret }}
             - name: certs
               mountPath: /certs

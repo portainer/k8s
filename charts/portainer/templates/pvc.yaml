@@ -1,3 +1,4 @@
+{{- if .Values.persistence.enabled -}}
 {{- if not .Values.persistence.existingClaim -}}
 ---
 kind: "PersistentVolumeClaim"
@@ -27,4 +28,5 @@ spec:
   selector:
 {{ toYaml .Values.persistence.selector | indent 4 }}
   {{ end }}
+{{- end }}
 {{- end }}
