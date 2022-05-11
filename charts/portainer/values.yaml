@@ -64,6 +64,8 @@ ingress:
 resources: {}
 
 persistence:
+  enabled: true
   size: "10Gi"
   annotations: {}
   storageClass:
+  existingClaim:
