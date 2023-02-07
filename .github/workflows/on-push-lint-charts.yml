@@ -62,32 +62,52 @@ jobs:
         run: ct lint --config .ci/ct-config.yaml
 
       # Refer to https://github.com/kubernetes-sigs/kind/releases when updating the node_images
-      - name: Create 1.20 kind cluster
+      - name: Create 1.21 kind cluster
         uses: helm/kind-action@v1.2.0
         with:
-          node_image: kindest/node:v1.20.2@sha256:8f7ea6e7642c0da54f04a7ee10431549c0257315b3a634f6ef2fecaaedb19bab
-          cluster_name: kubernetes-1.20
+          node_image: kindest/node:v1.21.14@sha256:9d9eb5fb26b4fbc0c6d95fa8c790414f9750dd583f5d7cee45d92e8c26670aa1
+          cluster_name: kubernetes-1.21
         if: steps.list-changed.outputs.changed == 'true'
 
-      - name: Run chart-testing (install) against 1.20
+      - name: Run chart-testing (install) against 1.21
         run: ct install --config .ci/ct-config.yaml
 
-      - name: Create 1.19 kind cluster
+      - name: Create 1.22 kind cluster
         uses: helm/kind-action@v1.2.0
         with:
-          node_image: kindest/node:v1.19.7@sha256:a70639454e97a4b733f9d9b67e12c01f6b0297449d5b9cbbef87473458e26dca
-          cluster_name: kubernetes-1.19
+          node_image: kindest/node:v1.22.15@sha256:7d9708c4b0873f0fe2e171e2b1b7f45ae89482617778c1c875f1053d4cef2e41
+          cluster_name: kubernetes-1.22
         if: steps.list-changed.outputs.changed == 'true'
 
-      - name: Run chart-testing (install) against 1.19
+      - name: Run chart-testing (install) against 1.22
         run: ct install --config .ci/ct-config.yaml
 
-      - name: Create 1.18 kind cluster
+      - name: Create 1.23 kind cluster
         uses: helm/kind-action@v1.2.0
         with:
-          node_image: kindest/node:v1.18.15@sha256:5c1b980c4d0e0e8e7eb9f36f7df525d079a96169c8a8f20d8bd108c0d0889cc4
-          cluster_name: kubernetes-1.18
+          node_image: kindest/node:v1.23.13@sha256:ef453bb7c79f0e3caba88d2067d4196f427794086a7d0df8df4f019d5e336b61
+          cluster_name: kubernetes-1.23
         if: steps.list-changed.outputs.changed == 'true'
 
-      - name: Run chart-testing (install) against 1.18
+      - name: Run chart-testing (install) against 1.23
+        run: ct install --config .ci/ct-config.yaml
+
+      - name: Create 1.24 kind cluster
+        uses: helm/kind-action@v1.2.0
+        with:
+          node_image: kindest/node:v1.24.7@sha256:577c630ce8e509131eab1aea12c022190978dd2f745aac5eb1fe65c0807eb315
+          cluster_name: kubernetes-1.24
+        if: steps.list-changed.outputs.changed == 'true'
+
+      - name: Run chart-testing (install) against 1.24
+        run: ct install --config .ci/ct-config.yaml
+
+      - name: Create 1.25 kind cluster
+        uses: helm/kind-action@v1.2.0
+        with:
+          node_image: kindest/node:v1.25.3@sha256:f52781bc0d7a19fb6c405c2af83abfeb311f130707a0e219175677e366cc45d1
+          cluster_name: kubernetes-1.25
+        if: steps.list-changed.outputs.changed == 'true'
+
+      - name: Run chart-testing (install) against 1.25
         run: ct install --config .ci/ct-config.yaml
