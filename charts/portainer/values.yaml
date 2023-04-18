@@ -9,12 +9,12 @@ enterpriseEdition:
   enabled: false
   image:
     repository: portainer/portainer-ee
-    tag: 2.17.1
+    tag: 2.18.1
     pullPolicy: Always
 
 image:
   repository: portainer/portainer-ce
-  tag: 2.17.1
+  tag: 2.18.1
   pullPolicy: Always
 
 imagePullSecrets: []
@@ -41,6 +41,12 @@ service:
 tls:
   # If set, Portainer will be configured to use TLS only
   force: false
+  # If set, will mount the existing secret into the pod
+  existingSecret: ""
+
+mtls:
+  # If set, Portainer will be configured to use mTLS only
+  enable: false
   # If set, will mount the existing secret into the pod
   existingSecret: ""
 

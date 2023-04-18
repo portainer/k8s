@@ -35,6 +35,11 @@ spec:
           secret:
             secretName: {{ .Values.tls.existingSecret }}
         {{- end }}
+        {{- if .Values.mtls.existingSecret }}
+        - name: mtlscerts
+          secret:
+            secretName: {{ .Values.mtls.existingSecret }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- if .Values.enterpriseEdition.enabled }}
@@ -52,6 +57,11 @@ spec:
           - --sslcert=/certs/tls.crt
           - --sslkey=/certs/tls.key
           {{- end }}
+          {{- if .Values.mtls.existingSecret }}
+          - --mtlscacert=/certs/mtls/mtlsca.crt
+          - --mtlscert=/certs/mtls/mtlscert.crt
+          - --mtlskey=/certs/mtls/mtlskey.key
+          {{- end }}          
           {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
           - '--tunnel-port={{ .Values.service.edgeNodePort }}'
           {{- end }}
@@ -66,6 +76,11 @@ spec:
             {{- if .Values.tls.existingSecret }}
             - name: certs
               mountPath: /certs
+              readOnly: true
+            {{- end }}
+            {{- if .Values.mtls.existingSecret }}
+            - name: mtlscerts
+              mountPath: /certs/mtls
               readOnly: true
             {{- end }}
           ports:
