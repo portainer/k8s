@@ -62,28 +62,8 @@ jobs:
         run: ct lint --config .ci/ct-config.yaml
 
       # Refer to https://github.com/kubernetes-sigs/kind/releases when updating the node_images
-      - name: Create 1.21 kind cluster
-        uses: helm/kind-action@v1.2.0
-        with:
-          node_image: kindest/node:v1.21.14@sha256:9d9eb5fb26b4fbc0c6d95fa8c790414f9750dd583f5d7cee45d92e8c26670aa1
-          cluster_name: kubernetes-1.21
-        if: steps.list-changed.outputs.changed == 'true'
-
-      - name: Run chart-testing (install) against 1.21
-        run: ct install --config .ci/ct-config.yaml
-
-      - name: Create 1.22 kind cluster
-        uses: helm/kind-action@v1.2.0
-        with:
-          node_image: kindest/node:v1.22.15@sha256:7d9708c4b0873f0fe2e171e2b1b7f45ae89482617778c1c875f1053d4cef2e41
-          cluster_name: kubernetes-1.22
-        if: steps.list-changed.outputs.changed == 'true'
-
-      - name: Run chart-testing (install) against 1.22
-        run: ct install --config .ci/ct-config.yaml
-
       - name: Create 1.23 kind cluster
-        uses: helm/kind-action@v1.2.0
+        uses: helm/kind-action@v1.4.0
         with:
           node_image: kindest/node:v1.23.13@sha256:ef453bb7c79f0e3caba88d2067d4196f427794086a7d0df8df4f019d5e336b61
           cluster_name: kubernetes-1.23
@@ -93,9 +73,9 @@ jobs:
         run: ct install --config .ci/ct-config.yaml
 
       - name: Create 1.24 kind cluster
-        uses: helm/kind-action@v1.2.0
+        uses: helm/kind-action@v1.4.0
         with:
-          node_image: kindest/node:v1.24.7@sha256:577c630ce8e509131eab1aea12c022190978dd2f745aac5eb1fe65c0807eb315
+          node_image: kindest/node:v1.24.12@sha256:1e12918b8bc3d4253bc08f640a231bb0d3b2c5a9b28aa3f2ca1aee93e1e8db16
           cluster_name: kubernetes-1.24
         if: steps.list-changed.outputs.changed == 'true'
 
@@ -103,11 +83,21 @@ jobs:
         run: ct install --config .ci/ct-config.yaml
 
       - name: Create 1.25 kind cluster
-        uses: helm/kind-action@v1.2.0
+        uses: helm/kind-action@v1.4.0
         with:
-          node_image: kindest/node:v1.25.3@sha256:f52781bc0d7a19fb6c405c2af83abfeb311f130707a0e219175677e366cc45d1
+          node_image: kindest/node:v1.25.8@sha256:00d3f5314cc35327706776e95b2f8e504198ce59ac545d0200a89e69fce10b7f
           cluster_name: kubernetes-1.25
         if: steps.list-changed.outputs.changed == 'true'
 
       - name: Run chart-testing (install) against 1.25
+        run: ct install --config .ci/ct-config.yaml
+
+      - name: Create 1.26 kind cluster
+        uses: helm/kind-action@v1.4.0
+        with:
+          node_image: kindest/node:v1.26.3@sha256:61b92f38dff6ccc29969e7aa154d34e38b89443af1a2c14e6cfbd2df6419c66f
+          cluster_name: kubernetes-1.26
+        if: steps.list-changed.outputs.changed == 'true'
+
+      - name: Run chart-testing (install) against 1.26
         run: ct install --config .ci/ct-config.yaml
