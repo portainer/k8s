@@ -96,6 +96,8 @@ spec:
               containerPort: 8000
               protocol: TCP
           livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 45
             httpGet:
               path: /
               {{- if .Values.tls.force }}
@@ -141,6 +143,8 @@ spec:
                 {{- end }}
               {{- end }}
           readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 45
             httpGet:
               path: /
               {{- if .Values.tls.force }}
