@@ -81,6 +81,8 @@ The following table lists the configurable parameters of the Portainer chart and
 | `resources` | Portainer resource requests and limits | `{}` |
 | `tls.force` | Force Portainer to be configured to use TLS only | `false` |
 | `tls.existingSecret` | Mount the existing TLS secret into the pod | `""` |
+| `mtls.enable` | Option to specicy mtls Certs to be used by Portainer | `false` |
+| `mtls.existingSecret` | Mount the existing mtls secret into the pod | `""` |
 | `persistence.enabled` | Whether to enable data persistence | `true` |
 | `persistence.existingClaim` | Name of an existing PVC to use for data persistence | `nil` |
 | `persistence.size` | Size of the PVC used for persistence | `10Gi` |
