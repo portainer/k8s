@@ -19,7 +19,9 @@ spec:
   resources:
     requests:
       storage: {{ .Values.persistence.size | quote }}
-  storageClassName: {{ if .Values.persistence.storageClass -}} {{ .Values.persistence.storageClass | quote }} {{- else -}} "" {{- end }}
+  {{- if .Values.persistence.storageClass }}
+  storageClassName: {{ .Values.persistence.storageClass | quote }}
+  {{ end }}
   {{- if .Values.persistence.selector }}
   selector:
 {{ toYaml .Values.persistence.selector | indent 4 }}
