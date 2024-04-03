@@ -98,6 +98,7 @@ spec:
           livenessProbe:
             failureThreshold: 3
             initialDelaySeconds: 45
+            periodSeconds: 30
             httpGet:
               path: /
               {{- if .Values.tls.force }}
@@ -145,6 +146,7 @@ spec:
           readinessProbe:
             failureThreshold: 3
             initialDelaySeconds: 45
+            periodSeconds: 30
             httpGet:
               path: /
               {{- if .Values.tls.force }}
