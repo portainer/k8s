@@ -65,11 +65,8 @@ spec:
           {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
           - '--tunnel-port={{ .Values.service.edgeNodePort }}'
           {{- end }}
-          {{- with .Values.imagePullSecrets }}
+          {{- with .Values.feature.flags }}
             {{- toYaml . | nindent 8 }}
-          {{- end }}
-          {{- if (not (empty .Values.feature.flags)) }}
-          - '{{ .Values.feature.flags }}'
           {{- end }}
           volumeMounts:
             {{- if .Values.persistence.enabled }}
