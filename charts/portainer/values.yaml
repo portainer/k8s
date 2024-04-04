@@ -51,7 +51,7 @@ mtls:
   existingSecret: ""
 
 feature:
-  flags: []
+  flags: {}
 
 ingress:
   enabled: false
