@@ -96,7 +96,7 @@ spec:
               containerPort: 8000
               protocol: TCP
           livenessProbe:
-            failureThreshold: 3
+            failureThreshold: 5
             initialDelaySeconds: 45
             periodSeconds: 30
             httpGet:
@@ -144,7 +144,7 @@ spec:
                 {{- end }}
               {{- end }}
           readinessProbe:
-            failureThreshold: 3
+            failureThreshold: 5
             initialDelaySeconds: 45
             periodSeconds: 30
             httpGet:
