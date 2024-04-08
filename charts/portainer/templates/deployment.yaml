@@ -65,8 +65,8 @@ spec:
           {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
           - '--tunnel-port={{ .Values.service.edgeNodePort }}'
           {{- end }}
-          {{- if (not (empty .Values.feature.flags)) }}
-          - '{{ .Values.feature.flags }}'
+          {{- range .Values.feature.flags }}
+          - {{ . | squote }}
           {{- end }}
           volumeMounts:
             {{- if .Values.persistence.enabled }}
@@ -96,8 +96,9 @@ spec:
               containerPort: 8000
               protocol: TCP
           livenessProbe:
-            failureThreshold: 3
+            failureThreshold: 5
             initialDelaySeconds: 45
+            periodSeconds: 30
             httpGet:
               path: /
               {{- if .Values.tls.force }}
@@ -143,8 +144,9 @@ spec:
                 {{- end }}
               {{- end }}
           readinessProbe:
-            failureThreshold: 3
+            failureThreshold: 5
             initialDelaySeconds: 45
+            periodSeconds: 30
             httpGet:
               path: /
               {{- if .Values.tls.force }}
