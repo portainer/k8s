@@ -21,6 +21,8 @@ imagePullSecrets: []
 
 nodeSelector: {}
 
+affinity: {}
+
 serviceAccount:
   annotations: {}
   name: portainer-sa-clusteradmin
