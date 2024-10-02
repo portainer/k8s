@@ -25,6 +25,10 @@ serviceAccount:
   annotations: {}
   name: portainer-sa-clusteradmin
 
+# This flag provides the ability to enable or disable RBAC-related resources during the deployment of the Portainer application
+# If you are using Portainer to manage the K8s cluster it is deployed to, this flag must be set to true 
+rbac: true
+
 service:
   # Set the httpNodePort and edgeNodePort only if the type is NodePort
   # For Ingress, set the type to be ClusterIP and set ingress.enabled to true
