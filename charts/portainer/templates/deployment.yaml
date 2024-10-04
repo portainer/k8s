@@ -23,7 +23,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.rbac }}
+      {{- if .Values.localMgmt }}
       serviceAccountName: {{ include "portainer.serviceAccountName" . }}
       {{- end }}
       volumes:
