@@ -64,6 +64,7 @@ The following table lists the configurable parameters of the Portainer chart and
 | `nodeSelector` | Used to apply a nodeSelector to the deployment | `{}` |
 | `serviceAccount.annotations` | Annotations to add to the service account | `null` |
 | `serviceAccount.name` | The name of the service account to use | `portainer-sa-clusteradmin` |
+| `localMgmt` | Enables or disables the creation of SA, Roles in local cluster where Portainer runs, only change when you don't need to manage the local cluster through this Portainer instance  | `true` |
 | `service.type` | Service Type for the main Portainer Service; ClusterIP, NodePort and LoadBalancer | `LoadBalancer` |
 | `service.httpPort` | HTTP port for accessing Portainer Web | `9000` |
 | `service.httpNodePort` | Static NodePort for accessing Portainer Web. Specify only if the type is NodePort | `30777` |
