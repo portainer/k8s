@@ -18,7 +18,8 @@ spec:
       labels:
         {{- include "portainer.selectorLabels" . | nindent 8 }}
     spec:
-      nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 -}}
+      nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 }}
+      tolerations: {{- toYaml .Values.tolerations | nindent 8 -}}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
