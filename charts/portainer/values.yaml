@@ -79,4 +79,5 @@ persistence:
   size: "10Gi"
   annotations: {}
   storageClass:
+  # volumeName: ""
   existingClaim:
