@@ -1,8 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "portainer.fullname" . -}}
 {{- $tlsforced := .Values.tls.force -}}
-{{- $apiVersion := include "ingress.apiVersion" . -}}
-apiVersion: {{ $apiVersion }}
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -34,11 +33,8 @@ spec:
         paths:
         {{- range .paths }}
           - path: {{ .path | default "/" }}
-            {{- if eq $apiVersion "networking.k8s.io/v1" }}
             pathType: Prefix
-            {{- end }}
             backend:
-            {{- if eq $apiVersion "networking.k8s.io/v1" }}
               service:
                 name: {{ $fullName }}
                 port:
@@ -47,14 +43,6 @@ spec:
                 {{- else }}
                   number: {{ .port | default 9000 }}
                 {{- end }}
-            {{- else }}
-              serviceName: {{ $fullName }}
-              {{- if $tlsforced }}
-              servicePort: {{ .port | default 9443 }}
-              {{- else }}
-              servicePort: {{ .port | default 9000 }}
-              {{- end }}
-            {{- end }}
         {{- end }}
   {{- end }}
 {{- end }}
