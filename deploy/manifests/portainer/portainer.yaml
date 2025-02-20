@@ -14,7 +14,7 @@ metadata:
   labels:
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "ce-latest-ee-2.21.5"
+    app.kubernetes.io/version: "ce-latest-ee-2.27.0"
 ---
 # Source: portainer/templates/pvc.yaml
 kind: "PersistentVolumeClaim"
@@ -28,7 +28,7 @@ metadata:
     io.portainer.kubernetes.application.stack: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "ce-latest-ee-2.21.5"
+    app.kubernetes.io/version: "ce-latest-ee-2.27.0"
 spec:
   accessModes:
     - "ReadWriteOnce"
@@ -44,7 +44,7 @@ metadata:
   labels:
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "ce-latest-ee-2.21.5"
+    app.kubernetes.io/version: "ce-latest-ee-2.27.0"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -64,7 +64,7 @@ metadata:
     io.portainer.kubernetes.application.stack: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "ce-latest-ee-2.21.5"
+    app.kubernetes.io/version: "ce-latest-ee-2.27.0"
 spec:
   type: NodePort
   ports:
@@ -97,7 +97,7 @@ metadata:
     io.portainer.kubernetes.application.stack: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "ce-latest-ee-2.21.5"
+    app.kubernetes.io/version: "ce-latest-ee-2.27.0"
 spec:
   replicas: 1
   strategy:
@@ -121,7 +121,7 @@ spec:
             claimName: portainer
       containers:
         - name: portainer
-          image: "portainer/portainer-ce:2.21.5"
+          image: "portainer/portainer-ce:2.27.0"
           imagePullPolicy: Always
           args:
             - '--tunnel-port=30776'
