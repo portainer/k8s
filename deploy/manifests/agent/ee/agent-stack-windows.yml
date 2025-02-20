@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   agent:
-    image: portainer/agent:2.21.5
+    image: portainer/agent:2.27.0
     ports:
       - target: 9001
         published: 9001
