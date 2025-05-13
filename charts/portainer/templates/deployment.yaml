@@ -43,6 +43,9 @@ spec:
           secret:
             secretName: {{ .Values.mtls.existingSecret }}
         {{- end }}
+        {{- with .Values.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- if .Values.enterpriseEdition.enabled }}
@@ -85,6 +88,9 @@ spec:
             - name: mtlscerts
               mountPath: /certs/mtls
               readOnly: true
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
             {{- end }}
           ports:
             {{- if not .Values.tls.force }}
