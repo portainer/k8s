@@ -91,3 +91,55 @@ The following table lists the configurable parameters of the Portainer chart and
 | `persistence.storageClass` | StorageClass to apply to PVC used for persistence | `default` |
 | `persistence.accessMode` | AccessMode for persistence | `ReadWriteOnce` |
 | `persistence.selector` | Selector for persistence | `nil` |
+
+## Ingress Configuration (Single or Multiple Ingress Resources)
+
+You can define your ingress configuration using the `ingress` key in your `values.yaml` file. This key supports both a single object (legacy) and an array (for multiple ingress resources):
+
+### Single Ingress (legacy)
+```yaml
+ingress:
+  enabled: true
+  ingressClassName: "nginx"
+  annotations: {}
+  hosts:
+    - host: portainer.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          port: 9000
+  tls: []
+```
+
+### Multiple Ingresses
+```yaml
+ingress:
+  - name: portainer-http
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":8000}]'
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
+    hosts:
+      - host: portainer.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+            port: 8000
+  - name: portainer-https
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/certificate-arn: <YOUR_CERT_ARN>
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":9443}]'
+      alb.ingress.kubernetes.io/backend-protocol: HTTPS
+      alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
+    hosts:
+      - host: portainer.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+            port: 9443
+```
+
+If `ingress` is an array, each entry will result in a separate Kubernetes Ingress resource. If it is a map/object, only one Ingress will be created (legacy behavior).

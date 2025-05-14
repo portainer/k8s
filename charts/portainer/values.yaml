@@ -58,6 +58,40 @@ mtls:
 feature:
   flags: []
 
+# Multi-ingress support:
+# You can define a single ingress object (legacy) or an array of ingress objects for multiple resources.
+# If ingress is an array, multiple Ingress resources will be created. If it is an object, only one will be created.
+# Example:
+# ingress:
+#   - name: portainer-http
+#     enabled: true
+#     annotations:
+#       kubernetes.io/ingress.class: alb
+#       alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":8000}]'
+#       alb.ingress.kubernetes.io/backend-protocol: HTTP
+#     hosts:
+#       - host: portainer.example.com
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             port: 8000
+#   - name: portainer-https
+#     enabled: true
+#     annotations:
+#       kubernetes.io/ingress.class: alb
+#       alb.ingress.kubernetes.io/certificate-arn: <YOUR_CERT_ARN>
+#       alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":9443}]'
+#       alb.ingress.kubernetes.io/backend-protocol: HTTPS
+#       alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
+#     hosts:
+#       - host: portainer.example.com
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             port: 9443
+#
+# If ingress is a map/object, the legacy single-ingress behavior is used.
+#
 ingress:
   enabled: false
   ingressClassName: ""
