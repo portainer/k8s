@@ -10,7 +10,7 @@ kubectl create namespace portainer
 Execute the following for testing the chart:
 
 ```bash
-helm install --dry-run --debug portainer -n portainer deploy/helm/portainer
+helm install --dry-run --debug portainer -n portainer portainer/portainer
 ```
 
 # Installing the Chart
