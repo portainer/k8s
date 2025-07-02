@@ -11,9 +11,10 @@ on:
       
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      pages: write
     steps:
     - uses: actions/checkout@v2
 
@@ -35,4 +36,4 @@ jobs:
       with:
         destination_branch: "gh-pages"
         github_token: "${{ secrets.GITHUB_TOKEN }}"
-        pr_allow_empty: false        
+        pr_allow_empty: false
