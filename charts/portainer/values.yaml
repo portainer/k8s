@@ -54,7 +54,7 @@ trusted_origins:
     enabled: false
       # specify (in a comma-separated list) the domain(s) used to access Portainer when it is behind a reverse proxy
         # example: portainer.mydomain.com,portainer.example.com
-          domains: ""
+    domains: ""
 
 mtls:
   # If set, Portainer will be configured to use mTLS only
