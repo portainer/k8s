@@ -9,12 +9,12 @@ enterpriseEdition:
   enabled: false
   image:
     repository: portainer/portainer-ee
-    tag: 2.27.8
+    tag: 2.27.9
     pullPolicy: Always
 
 image:
   repository: portainer/portainer-ce
-  tag: 2.27.8
+  tag: 2.27.9
   pullPolicy: Always
 
 imagePullSecrets: []
@@ -48,6 +48,13 @@ tls:
   force: false
   # If set, will mount the existing secret into the pod
   existingSecret: ""
+
+trusted_origins:
+  # If set, Portainer will be configured to trust the domains specified in domains
+    enabled: false
+      # specify (in a comma-separated list) the domain(s) used to access Portainer when it is behind a reverse proxy
+        # example: portainer.mydomain.com,portainer.example.com
+          domains: ""
 
 mtls:
   # If set, Portainer will be configured to use mTLS only
