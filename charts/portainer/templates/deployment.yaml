@@ -68,6 +68,9 @@ spec:
           {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
           - '--tunnel-port={{ .Values.service.edgeNodePort }}'
           {{- end }}
+          {{- if and .Values.trusted_origins.enabled (not (empty .Values.trusted_origins.domains)) }}
+          - '--trusted-origins={{ .Values.trusted_origins.domains | trim | quote }}'
+          {{- end }}
           {{- range .Values.feature.flags }}
           - {{ . | squote }}
           {{- end }}
