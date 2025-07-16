@@ -43,6 +43,9 @@ service:
   edgeNodePort: 30776
   annotations: {}
 
+# The following annotations are applied to the Portainer pod
+podAnnotations: {}
+
 tls:
   # If set, Portainer will be configured to use TLS only
   force: false
