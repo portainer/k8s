@@ -19,7 +19,7 @@ spec:
         {{- include "portainer.selectorLabels" . | nindent 8 }}
       annotations:
         {{- if .Values.podAnnotations }}
-        {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- tpl (toYaml .Values.podAnnotations) . | nindent 8 }}
         {{- end }}
     spec:
       nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 }}
