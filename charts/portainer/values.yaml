@@ -9,12 +9,12 @@ enterpriseEdition:
   enabled: false
   image:
     repository: portainer/portainer-ee
-    tag: 2.33.5
+    tag: 2.33.6
     pullPolicy: Always
 
 image:
   repository: portainer/portainer-ce
-  tag: 2.33.5
+  tag: 2.33.6
   pullPolicy: Always
 
 imagePullSecrets: []
