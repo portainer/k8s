@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "portainer-agent.fullname" . }}
+  labels:
+    {{- include "portainer-agent.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "portainer-agent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "portainer-agent.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "portainer-agent.fullname" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            {{- range .Values.feature.flags }}
+            - {{ . | squote }}
+            {{- end }}
+          env:
+            - name: LOG_LEVEL
+              value: DEBUG
+            - name: KUBERNETES_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: AGENT_CLUSTER_ADDR
+              value: {{ include "portainer-agent.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local
+            - name: AGENT_PORT
+              value: "{{ .Values.service.port }}"
+            {{- if eq .Values.deploymentMode "edge" }}
+            - name: EDGE
+              value: "1"
+            - name: EDGE_ID
+              value: {{ .Values.edge.id | quote }}
+            - name: EDGE_KEY
+              value: {{ .Values.edge.key | quote }}
+            - name: EDGE_INSECURE_POLL
+              value: "1"
+            {{- else if eq .Values.deploymentMode "edge-async" }}
+            - name: EDGE
+              value: "1"
+            - name: EDGE_ASYNC
+              value: "1"
+            - name: EDGE_ID
+              value: {{ .Values.edge.id | quote }}
+            - name: EDGE_KEY
+              value: {{ .Values.edge.key | quote }}
+            - name: EDGE_INSECURE_POLL
+              value: "1"
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }} 
