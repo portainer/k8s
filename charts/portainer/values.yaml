@@ -26,6 +26,19 @@ serviceAccount:
   annotations: {}
   name: portainer-sa-clusteradmin
 
+
+# -- List of extra mounts to add (normally used with extraVolumes)
+extraVolumeMounts: []
+# - mountPath: /etc/ssl/certs/ca-certificates.crt
+#   name: host-ca-certificates
+#   readOnly: true
+
+# -- List of extra volumes to add
+extraVolumes: []
+# - hostPath:
+#     path: /etc/ssl/certs/ca-certificates.crt
+#   name: host-ca-certificates
+
 # This flag provides the ability to enable or disable RBAC-related resources during the deployment of the Portainer application
 # If you are using Portainer to manage the K8s cluster it is deployed to, this flag must be set to true 
 localMgmt: true
