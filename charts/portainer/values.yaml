@@ -35,6 +35,7 @@ service:
   # For Ingress, set the type to be ClusterIP and set ingress.enabled to true
   # For Cloud Providers, set the type to be LoadBalancer
   type: NodePort
+  loadBalancerIP: ""
   httpPort: 9000
   httpsPort: 9443
   httpNodePort: 30777
