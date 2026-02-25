@@ -74,6 +74,10 @@ spec:
           {{- range .Values.feature.flags }}
           - {{ . | squote }}
           {{- end }}
+          {{- with .Values.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             {{- if .Values.persistence.enabled }}
             - name: data

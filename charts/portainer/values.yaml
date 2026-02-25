@@ -79,6 +79,19 @@ ingress:
       # - path: "/"
   tls: []
 
+# Extra environment variables to set on the portainer container.
+# Supports both plain values and valueFrom references (e.g. secretKeyRef, configMapKeyRef).
+# Example:
+# extraEnv:
+#   - name: MY_VAR
+#     value: "my-value"
+#   - name: MY_SECRET
+#     valueFrom:
+#       secretKeyRef:
+#         name: my-secret
+#         key: my-key
+extraEnv: []
+
 resources: {}
 
 persistence:
