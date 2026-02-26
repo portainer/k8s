@@ -103,7 +103,7 @@ spec:
             {{- end }}
             {{- if .Values.dbEncryption.existingSecret }}
             - name: db-encryption-key
-              mountPath: /run/secrets/portainer
+              mountPath: /run/portainer/portainer
               subPath: portainer
               readOnly: true
             {{- end }}
