@@ -17,6 +17,7 @@ This repo contains helm and YAML for deploying Portainer into a Kubernetes envir
   - [Enterprise Edition](#enterprise-edition-1)
     - [Using NodePort on a local/remote cluster](#using-nodeport-on-a-localremote-cluster-3)
     - [Using a cloud provider's loadbalancer](#using-a-cloud-providers-loadbalancer-3)
+- [Database Encryption](#database-encryption)
 - [Note re persisting data](#note-re-persisting-data)
 
 
@@ -119,6 +120,31 @@ kubectl apply- f https://raw.githubusercontent.com/portainer/k8s/master/deploy/m
 ```
 kubectl apply -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-lb-ee.yaml
 ```
+
+# Database Encryption
+
+Portainer supports encrypting its internal database at rest using a key you provide. This feature requires chart version **2.39.0** or later.
+
+> **⚠️ This is a non-reversible change.** Once Portainer starts with encryption enabled the database will be encrypted and cannot be decrypted without the original key. Rolling back to a chart version older than 2.39.0 is not supported after encryption has been enabled.
+
+> **⚠️ Back up your encryption key externally.** A Kubernetes secret is not a sufficient sole backup. Store the key in a secure external system (e.g. HashiCorp Vault, AWS Secrets Manager, Azure Key Vault) before enabling this feature. If the key is lost, the Portainer database cannot be recovered.
+
+Create the secret in the same namespace as Portainer:
+
+```bash
+kubectl create secret generic portainer-key \
+  --from-literal=secret=<your-encryption-key> \
+  -n portainer
+```
+
+Then enable it via Helm:
+
+```bash
+helm upgrade -i -n portainer portainer portainer/portainer \
+  --set dbEncryption.existingSecret=portainer-key
+```
+
+For full details see the [chart README](/charts/portainer/README.md#database-encryption).
 
 # Note re persisting data
 
