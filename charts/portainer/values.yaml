@@ -62,6 +62,12 @@ mtls:
   # If set, will mount the existing secret into the pod
   existingSecret: ""
 
+dbEncryption:
+  # If set, will mount the existing secret into the pod to enable Portainer database encryption.
+  # The secret must contain a key named 'secret' holding the encryption key.
+  # Example: kubectl create secret generic portainer-key --from-literal=secret=<your-key> -n portainer
+  existingSecret: ""
+
 feature:
   flags: []
 
