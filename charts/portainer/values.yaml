@@ -9,12 +9,12 @@ enterpriseEdition:
   enabled: false
   image:
     repository: portainer/portainer-ee
-    tag: 2.33.7
+    tag: 2.39.0
     pullPolicy: Always
 
 image:
   repository: portainer/portainer-ce
-  tag: 2.33.7
+  tag: 2.39.0
   pullPolicy: Always
 
 imagePullSecrets: []
@@ -60,6 +60,27 @@ mtls:
   # If set, Portainer will be configured to use mTLS only
   enable: false
   # If set, will mount the existing secret into the pod
+  existingSecret: ""
+
+dbEncryption:
+  # If set, will mount the existing secret into the pod to enable Portainer database encryption.
+  #
+  # WARNING: Enabling database encryption is a non-reversible change. Once Portainer starts with
+  # encryption enabled the database will be encrypted and cannot be used without the original key.
+  # Rolling back to a Helm chart version older than 2.39.0 is not supported after encryption has
+  # been enabled.
+  #
+  # WARNING: Do not rely solely on the Kubernetes secret as your only copy of the encryption key.
+  # Back up the key value in a secure external location (e.g. HashiCorp Vault, AWS Secrets Manager,
+  # Azure Key Vault, or equivalent) before enabling this feature. If the key is lost, the Portainer
+  # database cannot be recovered.
+  #
+  # The secret must contain a key named 'secret' holding the encryption key value.
+  # To create the secret:
+  #   kubectl create secret generic portainer-key \
+  #     --from-literal=secret=<your-encryption-key> \
+  #     -n portainer
+  #
   existingSecret: ""
 
 feature:

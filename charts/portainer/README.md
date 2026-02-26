@@ -84,6 +84,7 @@ The following table lists the configurable parameters of the Portainer chart and
 | `tls.existingSecret` | Mount the existing TLS secret into the pod | `""` |
 | `mtls.enable` | Option to specicy mtls Certs to be used by Portainer | `false` |
 | `mtls.existingSecret` | Mount the existing mtls secret into the pod | `""` |
+| `dbEncryption.existingSecret` | Name of an existing secret containing the DB encryption key. See [Database Encryption](#database-encryption) below. **Non-reversible — read the section before enabling.** | `""` |
 | `persistence.enabled` | Whether to enable data persistence | `true` |
 | `persistence.existingClaim` | Name of an existing PVC to use for data persistence | `nil` |
 | `persistence.size` | Size of the PVC used for persistence | `10Gi` |
@@ -91,3 +92,40 @@ The following table lists the configurable parameters of the Portainer chart and
 | `persistence.storageClass` | StorageClass to apply to PVC used for persistence | `default` |
 | `persistence.accessMode` | AccessMode for persistence | `ReadWriteOnce` |
 | `persistence.selector` | Selector for persistence | `nil` |
+| `extraEnv` | Extra environment variables to inject into the Portainer container. Supports `value` and `valueFrom` forms. | `[]` |
+
+# Database Encryption
+
+Portainer supports encrypting its internal database at rest using a key you provide. This feature is available from chart version **2.39.0** onwards.
+
+> **⚠️ This is a non-reversible change.** Once Portainer starts with encryption enabled the database will be encrypted and cannot be decrypted without the original key. Rolling back to a chart version older than 2.39.0 is not supported after encryption has been enabled.
+
+> **⚠️ Back up your encryption key externally.** A Kubernetes secret is not a sufficient sole backup. Store the key in a secure external system (e.g. HashiCorp Vault, AWS Secrets Manager, Azure Key Vault) before enabling this feature. If the key is lost, the Portainer database cannot be recovered.
+
+## Step 1 — Create the encryption key secret
+
+Choose a strong random key and create the Kubernetes secret in the same namespace as Portainer:
+
+```bash
+kubectl create secret generic portainer-key \
+  --from-literal=secret=<your-encryption-key> \
+  -n portainer
+```
+
+The secret key must be named `secret`.
+
+## Step 2 — Enable encryption in your Helm values
+
+```yaml
+dbEncryption:
+  existingSecret: "portainer-key"
+```
+
+Or pass it directly on the command line:
+
+```bash
+helm upgrade -i -n portainer portainer portainer/portainer \
+  --set dbEncryption.existingSecret=portainer-key
+```
+
+Portainer will detect the mounted key on startup and encrypt the database automatically. No additional flags are required.
