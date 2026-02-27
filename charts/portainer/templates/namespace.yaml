@@ -1,0 +1,8 @@
+{{ if .Values.createNamespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: portainer
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+{{ end }}

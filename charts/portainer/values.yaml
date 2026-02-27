@@ -9,21 +9,34 @@ enterpriseEdition:
   enabled: false
   image:
     repository: portainer/portainer-ee
+<<<<<<< HEAD
+    tag: 2.39.0
+    pullPolicy: Always
+=======
     tag: 2.0.0
     pullPolicy: IfNotPresent
+>>>>>>> gh-pages
 
 image:
   repository: portainer/portainer-ce
-  tag: latest
-  pullPolicy: IfNotPresent
+  tag: 2.39.0
+  pullPolicy: Always
 
 imagePullSecrets: []
 
 nodeSelector: {}
+<<<<<<< HEAD
+tolerations: []
+=======
+>>>>>>> gh-pages
 
 serviceAccount:
   annotations: {}
   name: portainer-sa-clusteradmin
+
+# This flag provides the ability to enable or disable RBAC-related resources during the deployment of the Portainer application
+# If you are using Portainer to manage the K8s cluster it is deployed to, this flag must be set to true 
+localMgmt: true
 
 service:
   # Set the httpNodePort and edgeNodePort only if the type is NodePort
@@ -31,21 +44,95 @@ service:
   # For Cloud Providers, set the type to be LoadBalancer
   type: NodePort
   httpPort: 9000
+  httpsPort: 9443
   httpNodePort: 30777
+  httpsNodePort: 30779
   edgePort: 8000
   edgeNodePort: 30776
   annotations: {}
 
+tls:
+  # If set, Portainer will be configured to use TLS only
+  force: false
+  # If set, will mount the existing secret into the pod
+  existingSecret: ""
+
+trusted_origins:
+  # If set, Portainer will be configured to trust the domains specified in domains
+    enabled: false
+      # specify (in a comma-separated list) the domain(s) used to access Portainer when it is behind a reverse proxy
+        # example: portainer.mydomain.com,portainer.example.com
+    domains: ""
+
+mtls:
+  # If set, Portainer will be configured to use mTLS only
+  enable: false
+  # If set, will mount the existing secret into the pod
+  existingSecret: ""
+
+dbEncryption:
+  # If set, will mount the existing secret into the pod to enable Portainer database encryption.
+  #
+  # WARNING: Enabling database encryption is a non-reversible change. Once Portainer starts with
+  # encryption enabled the database will be encrypted and cannot be used without the original key.
+  # Rolling back to a Helm chart version older than 2.39.0 is not supported after encryption has
+  # been enabled.
+  #
+  # WARNING: Do not rely solely on the Kubernetes secret as your only copy of the encryption key.
+  # Back up the key value in a secure external location (e.g. HashiCorp Vault, AWS Secrets Manager,
+  # Azure Key Vault, or equivalent) before enabling this feature. If the key is lost, the Portainer
+  # database cannot be recovered.
+  #
+  # The secret must contain a key named 'secret' holding the encryption key value.
+  # To create the secret:
+  #   kubectl create secret generic portainer-key \
+  #     --from-literal=secret=<your-encryption-key> \
+  #     -n portainer
+  #
+  # The mount path is determined automatically based on the enterpriseEdition.enabled value:
+  #   - CE (enterpriseEdition.enabled: false): /run/secrets/portainer
+  #   - EE (enterpriseEdition.enabled: true):  /run/portainer/portainer
+  #
+  existingSecret: ""
+
+feature:
+  flags: []
+
 ingress:
   enabled: false
+  ingressClassName: ""
   annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # Only use below if tls.force=true
+    # nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+  # Note: Hosts and paths are of type array
   hosts:
     - host:
       paths: []
+      # - path: "/"
   tls: []
+
+# Extra environment variables to set on the portainer container.
+# Supports both plain values and valueFrom references (e.g. secretKeyRef, configMapKeyRef).
+# Example:
+# extraEnv:
+#   - name: MY_VAR
+#     value: "my-value"
+#   - name: MY_SECRET
+#     valueFrom:
+#       secretKeyRef:
+#         name: my-secret
+#         key: my-key
+extraEnv: []
 
 resources: {}
 
 persistence:
+<<<<<<< HEAD
+  enabled: true
+=======
+>>>>>>> gh-pages
   size: "10Gi"
   annotations: {}
+  storageClass:
+  existingClaim:

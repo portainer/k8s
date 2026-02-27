@@ -11,9 +11,11 @@ on:
       
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      pages: write
+      pull-requests: write
     steps:
     - uses: actions/checkout@v2
 
@@ -26,7 +28,7 @@ jobs:
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
     - name: Run chart-releaser
-      uses: helm/chart-releaser-action@v1.0.0
+      uses: helm/chart-releaser-action@v1.1.0
       env:
         CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -35,4 +37,4 @@ jobs:
       with:
         destination_branch: "gh-pages"
         github_token: "${{ secrets.GITHUB_TOKEN }}"
-        pr_allow_empty: false        
+        pr_allow_empty: false

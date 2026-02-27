@@ -1,23 +1,9 @@
 ---
-# Source: portainer/templates/pvc.yaml
-kind: "PersistentVolumeClaim"
-apiVersion: "v1"
+# Source: portainer/templates/namespace.yaml
+apiVersion: v1
+kind: Namespace
 metadata:
   name: portainer
-  namespace: portainer  
-  annotations:
-    volume.alpha.kubernetes.io/storage-class: "generic"
-  labels:
-    io.portainer.kubernetes.application.stack: portainer
-    app.kubernetes.io/name: portainer
-    app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "2.0.0"
-spec:
-  accessModes:
-    - "ReadWriteOnce"
-  resources:
-    requests:
-      storage: "10Gi"
 ---
 # Source: portainer/templates/serviceaccount.yaml
 apiVersion: v1
@@ -28,7 +14,27 @@ metadata:
   labels:
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "ce-latest-ee-2.39.0"
+---
+# Source: portainer/templates/pvc.yaml
+kind: "PersistentVolumeClaim"
+apiVersion: "v1"
+metadata:
+  name: portainer
+  namespace: portainer
+  annotations:
+    volume.alpha.kubernetes.io/storage-class: "generic"
+  labels:
+    io.portainer.kubernetes.application.stack: portainer
+    app.kubernetes.io/name: portainer
+    app.kubernetes.io/instance: portainer
+    app.kubernetes.io/version: "ce-latest-ee-2.39.0"
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "10Gi"
 ---
 # Source: portainer/templates/rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -38,15 +44,15 @@ metadata:
   labels:
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "ce-latest-ee-2.39.0"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
-- kind: ServiceAccount
-  namespace: portainer
-  name: portainer-sa-clusteradmin
+  - kind: ServiceAccount
+    namespace: portainer
+    name: portainer-sa-clusteradmin
 ---
 # Source: portainer/templates/service.yaml
 apiVersion: v1
@@ -58,7 +64,7 @@ metadata:
     io.portainer.kubernetes.application.stack: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "ce-latest-ee-2.39.0"
 spec:
   type: LoadBalancer
   ports:
@@ -66,6 +72,10 @@ spec:
       targetPort: 9000
       protocol: TCP
       name: http
+    - port: 9443
+      targetPort: 9443
+      protocol: TCP
+      name: https
     - port: 8000
       targetPort: 8000
       protocol: TCP
@@ -84,7 +94,7 @@ metadata:
     io.portainer.kubernetes.application.stack: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/instance: portainer
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "ce-latest-ee-2.39.0"
 spec:
   replicas: 1
   strategy:
@@ -99,15 +109,18 @@ spec:
         app.kubernetes.io/name: portainer
         app.kubernetes.io/instance: portainer
     spec:
+      nodeSelector:
+        {}
       serviceAccountName: portainer-sa-clusteradmin
       volumes:
-         - name: "data"
-           persistentVolumeClaim:
-             claimName: portainer      
+        - name: "data"
+          persistentVolumeClaim:
+            claimName: portainer
       containers:
         - name: portainer
-          image: "portainer/portainer-ce:latest"
-          imagePullPolicy: IfNotPresent          
+          image: "portainer/portainer-ce:2.39.0"
+          imagePullPolicy: Always
+          args:
           volumeMounts:
             - name: data
               mountPath: /data
@@ -115,17 +128,21 @@ spec:
             - name: http
               containerPort: 9000
               protocol: TCP
+            - name: https
+              containerPort: 9443
+              protocol: TCP
             - name: tcp-edge
               containerPort: 8000
-              protocol: TCP              
+              protocol: TCP
           livenessProbe:
             httpGet:
               path: /
-              port: 9000
+              port: 9443
+              scheme: HTTPS
           readinessProbe:
             httpGet:
               path: /
-              port: 9000
+              port: 9443
+              scheme: HTTPS
           resources:
             {}
-

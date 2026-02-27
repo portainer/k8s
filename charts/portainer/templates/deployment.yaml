@@ -18,16 +18,39 @@ spec:
       labels:
         {{- include "portainer.selectorLabels" . | nindent 8 }}
     spec:
-      nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 -}}      
-    {{- with .Values.imagePullSecrets }}
+      nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 }}
+      tolerations: {{- toYaml .Values.tolerations | nindent 8 -}}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
+      {{- if .Values.localMgmt }}
       serviceAccountName: {{ include "portainer.serviceAccountName" . }}
+      {{- end }}
       volumes:
-         - name: "data"
-           persistentVolumeClaim:
-             claimName: {{ template "portainer.pvcName" . }}      
+        {{- if .Values.persistence.enabled }}
+        - name: "data"
+          persistentVolumeClaim:
+            claimName: {{ template "portainer.pvcName" . }}
+        {{- end }}
+        {{- if .Values.tls.existingSecret }}
+        - name: certs
+          secret:
+            secretName: {{ .Values.tls.existingSecret }}
+        {{- end }}
+        {{- if .Values.mtls.existingSecret }}
+        - name: mtlscerts
+          secret:
+            secretName: {{ .Values.mtls.existingSecret }}
+        {{- end }}
+        {{- if .Values.dbEncryption.existingSecret }}
+        - name: portainer-key
+          secret:
+            secretName: {{ .Values.dbEncryption.existingSecret }}
+            items:
+              - key: secret
+                path: portainer
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- if .Values.enterpriseEdition.enabled }}
@@ -41,22 +64,137 @@ spec:
           args:  [ '--tunnel-port','{{ .Values.service.edgeNodePort }}' ]
       {{- end }}          
           volumeMounts:
+            {{- if .Values.persistence.enabled }}
             - name: data
               mountPath: /data
+            {{- end }}
+            {{- if .Values.tls.existingSecret }}
+            - name: certs
+              mountPath: /certs
+              readOnly: true
+            {{- end }}
+            {{- if .Values.mtls.existingSecret }}
+            - name: mtlscerts
+              mountPath: /certs/mtls
+              readOnly: true
+            {{- end }}
+            {{- if .Values.dbEncryption.existingSecret }}
+            - name: portainer-key
+              {{- if .Values.enterpriseEdition.enabled }}
+              mountPath: /run/portainer/portainer
+              {{- else }}
+              mountPath: /run/secrets/portainer
+              {{- end }}
+              subPath: portainer
+              readOnly: true
+            {{- end }}
           ports:
+            {{- if not .Values.tls.force }}
             - name: http
               containerPort: 9000
               protocol: TCP
+            {{- end }}
+            - name: https
+              containerPort: 9443
+              protocol: TCP
             - name: tcp-edge
               containerPort: 8000
-              protocol: TCP              
+              protocol: TCP
           livenessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 45
+            periodSeconds: 30
             httpGet:
               path: /
+              {{- if .Values.tls.force }}
+              port: 9443
+              scheme: HTTPS
+              {{- else }}
+                {{- if .Values.enterpriseEdition.enabled }}
+                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.enterpriseEdition.image.tag }}
+                    {{- if eq (semver .Values.enterpriseEdition.image.tag | (semver "2.7.0").Compare) -1 }}
+              port: 9443
+              scheme: HTTPS
+                    {{- else }}
               port: 9000
+              scheme: HTTP
+                    {{- end }}
+                  {{- else }}
+                    {{- if eq .Values.enterpriseEdition.image.tag "latest" }}
+              port: 9443
+              scheme: HTTPS
+                    {{- else }}
+              port: 9000
+              scheme: HTTP
+                    {{- end }}
+                  {{- end}}
+                {{- else }}
+                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.image.tag }}
+                    {{- if eq (semver .Values.image.tag | (semver "2.6.0").Compare) -1 }}
+              port: 9443
+              scheme: HTTPS
+                    {{- else }}
+              port: 9000
+              scheme: HTTP
+                    {{- end}}
+                  {{- else }}
+                    {{- if eq .Values.image.tag "latest" }}
+              port: 9443
+              scheme: HTTPS
+                    {{- else }}
+              port: 9000
+              scheme: HTTP
+                    {{- end }}
+                  {{- end }}
+                {{- end }}
+              {{- end }}
           readinessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 45
+            periodSeconds: 30
             httpGet:
               path: /
+              {{- if .Values.tls.force }}
+              port: 9443
+              scheme: HTTPS
+              {{- else }}
+                {{- if .Values.enterpriseEdition.enabled }}
+                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.enterpriseEdition.image.tag }}
+                    {{- if eq (semver .Values.enterpriseEdition.image.tag | (semver "2.7.0").Compare) -1 }}
+              port: 9443
+              scheme: HTTPS
+                    {{- else }}
               port: 9000
+              scheme: HTTP
+                    {{- end }}
+                  {{- else }}
+                    {{- if eq .Values.enterpriseEdition.image.tag "latest" }}
+              port: 9443
+              scheme: HTTPS
+                    {{- else }}
+              port: 9000
+              scheme: HTTP
+                    {{- end }}
+                  {{- end}}
+                {{- else }}
+                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.image.tag }}
+                    {{- if eq (semver .Values.image.tag | (semver "2.6.0").Compare) -1 }}
+              port: 9443
+              scheme: HTTPS
+                    {{- else }}
+              port: 9000
+              scheme: HTTP
+                    {{- end}}
+                  {{- else }}
+                    {{- if eq .Values.image.tag "latest" }}
+              port: 9443
+              scheme: HTTPS
+                    {{- else }}
+              port: 9000
+              scheme: HTTP
+                    {{- end }}
+                  {{- end }}
+                {{- end }}
+              {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

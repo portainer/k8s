@@ -15,6 +15,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
+    {{- if not .Values.tls.force }}
     - port: {{ .Values.service.httpPort }}
       targetPort: 9000
       protocol: TCP
@@ -22,7 +23,15 @@ spec:
       {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.httpNodePort))) }}
       nodePort: {{ .Values.service.httpNodePort}}
       {{- end }}
-      {{- if (eq .Values.service.type "NodePort") }}
+    {{- end }}
+    - port: {{ .Values.service.httpsPort }}
+      targetPort: 9443
+      protocol: TCP
+      name: https
+      {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.httpsNodePort))) }}
+      nodePort: {{ .Values.service.httpsNodePort}}
+      {{- end }}
+    {{- if (eq .Values.service.type "NodePort") }}
     - port: {{ .Values.service.edgeNodePort }}
       targetPort: {{ .Values.service.edgeNodePort }}
       {{- else }}
@@ -33,6 +42,6 @@ spec:
       name: edge
       {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
       nodePort: {{ .Values.service.edgeNodePort }}
-      {{- end }}
+    {{- end }}
   selector:
     {{- include "portainer.selectorLabels" . | nindent 4 }}

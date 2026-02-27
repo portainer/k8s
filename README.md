@@ -17,12 +17,15 @@ This repo contains helm and YAML for deploying Portainer into a Kubernetes envir
   - [Enterprise Edition](#enterprise-edition-1)
     - [Using NodePort on a local/remote cluster](#using-nodeport-on-a-localremote-cluster-3)
     - [Using a cloud provider's loadbalancer](#using-a-cloud-providers-loadbalancer-3)
+- [Database Encryption](#database-encryption)
 - [Note re persisting data](#note-re-persisting-data)
 
 
 
 
 # Deploying with Helm
+
+Ensure you're using at least helm v3.2, which [includes support](https://github.com/helm/helm/pull/7648) for the `--create-namespace` argument.
 
 Install the repository:
 
@@ -31,11 +34,7 @@ helm repo add portainer https://portainer.github.io/k8s/
 helm repo update
 ```
 
-Create the portainer namespace:
-
-```
-kubectl create namespace portainer
-```
+## Community Edition
 
 ## Community Edition
 
@@ -44,71 +43,72 @@ Install the helm chart:
 ### Using NodePort on a local/remote cluster
 
 ```
-helm install -n portainer portainer portainer/portainer
+helm install --create-namespace -n portainer portainer portainer/portainer
 ```
 
 ###  Using a cloud provider's loadbalancer
 
 ```
-helm install -n portainer portainer portainer/portainer --set service.type=LoadBalancer
+helm install --create-namespace -n portainer portainer portainer/portainer \
+--set service.type=LoadBalancer
 ```
 
 
 ### Using ClusterIP with an ingress
 
 ```
-helm install -n portainer portainer portainer/portainer --set service.type=ClusterIP
+helm install --create-namespace -n portainer portainer portainer/portainer \
+--set service.type=ClusterIP
 ```
 
 For advanced helm customization, see the [chart README](/charts/portainer/README.md)
 
 ## Enterprise Edition
-
-### Using NodePort on a local/remote cluster
-
-```
-helm install --set enterpriseEdition.enabled=true -n portainer portainer portainer/portainer
-```
-
-###  Using a cloud provider's loadbalancer
-
-```
-helm install  --set enterpriseEdition.enabled=true -n portainer portainer portainer/portainer --set service.type=LoadBalancer
-```
-
-
-### Using ClusterIP with an ingress
-
-```
-helm install  --set enterpriseEdition.enabled=true -n portainer portainer portainer/portainer --set service.type=ClusterIP
-```
-
-For advanced helm customization, see the [chart README](/charts/portainer/README.md)
-
-# Deploying with manifests
-
-If you're not into helm, you can install Portainer using manifests, by first creating the portainer namespace:
-
-```
-kubectl create namespace portainer
-```
-
-And then...
 
 ## Community Edition
 
 ### Using NodePort on a local/remote cluster
 
 ```
-kubectl create namespace portainer
-kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer.yaml
+helm install --create-namespace -n portainer portainer portainer/portainer \
+--set enterpriseEdition.enabled=true 
 ```
 
 ###  Using a cloud provider's loadbalancer
 
 ```
-kubectl create namespace portainer
-kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-lb.yaml
+helm install --create-namespace -n portainer portainer portainer/portainer \
+--set enterpriseEdition.enabled=true  \
+--set service.type=LoadBalancer
+```
+
+
+### Using ClusterIP with an ingress
+
+```
+helm install --create-namespace -n portainer portainer portainer/portainer \
+--set enterpriseEdition.enabled=true \
+--set service.type=ClusterIP
+```
+
+For advanced helm customization, see the [chart README](/charts/portainer/README.md)
+
+# Deploying with manifests
+
+If you're not using helm, you can install Portainer using manifests directly, as follows
+
+## Community Edition
+
+### Using NodePort on a local/remote cluster
+
+```
+kubectl apply -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer.yaml
+```
+
+###  Using a cloud provider's loadbalancer
+
+```
+kubectl apply -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-lb.yaml
 ```
 
 ## Enterprise Edition
@@ -116,16 +116,39 @@ kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/ma
 ### Using NodePort on a local/remote cluster
 
 ```
-kubectl create namespace portainer
-kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-ee.yaml
+kubectl apply- f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-ee.yaml
 ```
 
 ###  Using a cloud provider's loadbalancer
 
 ```
-kubectl create namespace portainer
-kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-lb-ee.yaml
+kubectl apply -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer-lb-ee.yaml
 ```
+
+# Database Encryption
+
+Portainer supports encrypting its internal database at rest using a key you provide. This feature requires chart version **2.39.0** or later.
+
+> **⚠️ This is a non-reversible change.** Once Portainer starts with encryption enabled the database will be encrypted and cannot be decrypted without the original key. Rolling back to a chart version older than 2.39.0 is not supported after encryption has been enabled.
+
+> **⚠️ Back up your encryption key externally.** A Kubernetes secret is not a sufficient sole backup. Store the key in a secure external system (e.g. HashiCorp Vault, AWS Secrets Manager, Azure Key Vault) before enabling this feature. If the key is lost, the Portainer database cannot be recovered.
+
+Create the secret in the same namespace as Portainer:
+
+```bash
+kubectl create secret generic portainer-key \
+  --from-literal=secret=<your-encryption-key> \
+  -n portainer
+```
+
+Then enable it via Helm:
+
+```bash
+helm upgrade -i -n portainer portainer portainer/portainer \
+  --set dbEncryption.existingSecret=portainer-key
+```
+
+For full details see the [chart README](/charts/portainer/README.md#database-encryption).
 
 # Note re persisting data
 

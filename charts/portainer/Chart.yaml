@@ -16,16 +16,20 @@ type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
+<<<<<<< HEAD
+version: 2.39.0+pr204
+=======
 version: 1.0.7
+>>>>>>> gh-pages
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application.
-appVersion: 2.0.0
+appVersion: ce-latest-ee-2.39.0
 
 sources:
     - https://github.com/portainer/k8s
 
 maintainers:
-    - name: funkypenguin
-      email: davidy@funkypenguin.co.nz
-      url: https://www.funkypenguin.co.nz
+    - name: Portainer
+      email: platform-team@portainer.io
+      url: https://www.portainer.io

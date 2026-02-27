@@ -1,10 +1,8 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "portainer.fullname" . -}}
-{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- else -}}
-apiVersion: extensions/v1beta1
-{{- end }}
+{{- $tlsforced := .Values.tls.force -}}
+{{- $apiVersion := include "ingress.apiVersion" . -}}
+apiVersion: {{ $apiVersion }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -16,6 +14,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+{{- with .Values.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+{{- end }}
 {{- if .Values.ingress.tls }}
   tls:
   {{- range .Values.ingress.tls }}
@@ -33,9 +34,27 @@ spec:
         paths:
         {{- range .paths }}
           - path: {{ .path | default "/" }}
+            {{- if eq $apiVersion "networking.k8s.io/v1" }}
+            pathType: Prefix
+            {{- end }}
             backend:
+            {{- if eq $apiVersion "networking.k8s.io/v1" }}
+              service:
+                name: {{ $fullName }}
+                port:
+                {{- if $tlsforced }}
+                  number: {{ .port | default 9443 }}
+                {{- else }}
+                  number: {{ .port | default 9000 }}
+                {{- end }}
+            {{- else }}
               serviceName: {{ $fullName }}
+              {{- if $tlsforced }}
+              servicePort: {{ .port | default 9443 }}
+              {{- else }}
               servicePort: {{ .port | default 9000 }}
+              {{- end }}
+            {{- end }}
         {{- end }}
   {{- end }}
 {{- end }}

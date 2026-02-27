@@ -4,31 +4,104 @@ on:
   push:
     paths:
       - 'charts/**' 
-      - '.github/**'            
+      - '.github/**'
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  KUBE_SCORE_VERSION: 1.10.0
+  HELM_VERSION: v3.10.1
 
 jobs:
   lint-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
           
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Set up kube-score
+        run: |
+          wget https://github.com/zegl/kube-score/releases/download/v${{ env.KUBE_SCORE_VERSION }}/kube-score_${{ env.KUBE_SCORE_VERSION }}_linux_amd64 -O kube-score
+          chmod 755 kube-score
+
+      - name: Kube-score generated manifests
+        run: helm template charts/* | ./kube-score score -
+              --ignore-test pod-networkpolicy
+              --ignore-test deployment-has-poddisruptionbudget
+              --ignore-test deployment-has-host-podantiaffinity
+              --ignore-test container-security-context
+              --ignore-test container-resources
+              --ignore-test pod-probes
+              --ignore-test container-image-tag
+              --enable-optional-test container-security-context-privileged
+
+      # python is a requirement for the chart-testing action below (supports yamllint among other tests)
+      - uses: actions/setup-python@v5.3.0
+        with:
+          python-version: 3.13.1
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.6.1
+        with:
+          version: v3.10.1
+
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --config .ci/ct-config.yaml)
+          if [[ -n "$changed" ]]; then
+            echo "::set-output name=changed::true"
+          fi
+
       - name: Run chart-testing (lint)
-        id: lint
-        uses: helm/chart-testing-action@v1.0.0
-        with:
-          config: .ci/ct-config.yaml
-          command: lint
+        run: ct lint --config .ci/ct-config.yaml
 
-      - name: Create kind cluster
-        uses: helm/kind-action@v1.0.0
+      # Refer to https://github.com/kubernetes-sigs/kind/releases when updating the node_images
+      - name: Create 1.29 kind cluster
+        uses: helm/kind-action@v1.12.0
         with:
-          install_local_path_provisioner: true
-        # Only build a kind cluster if there are chart changes to test.
-        if: steps.lint.outputs.changed == 'true'
+          node_image: kindest/node:v1.29.14@sha256:8703bd94ee24e51b778d5556ae310c6c0fa67d761fae6379c8e0bb480e6fea29
+          cluster_name: kubernetes-1.29
+        if: steps.list-changed.outputs.changed == 'true'
 
-      - name: Run chart-testing (install)
-        uses: helm/chart-testing-action@v1.0.0
+      - name: Run chart-testing (install) against 1.29
+        run: ct install --config .ci/ct-config.yaml
+
+      - name: Create 1.30 kind cluster
+        uses: helm/kind-action@v1.12.0
         with:
-          command: install
-          config: .ci/ct-config.yaml
+          node_image: kindest/node:v1.30.10@sha256:4de75d0e82481ea846c0ed1de86328d821c1e6a6a91ac37bf804e5313670e507
+          cluster_name: kubernetes-1.30
+        if: steps.list-changed.outputs.changed == 'true'
+
+      - name: Run chart-testing (install) against 1.30
+        run: ct install --config .ci/ct-config.yaml
+
+      - name: Create 1.31 kind cluster
+        uses: helm/kind-action@v1.12.0
+        with:
+          node_image: kindest/node:v1.31.6@sha256:28b7cbb993dfe093c76641a0c95807637213c9109b761f1d422c2400e22b8e87
+          cluster_name: kubernetes-1.31
+        if: steps.list-changed.outputs.changed == 'true'
+
+      - name: Run chart-testing (install) against 1.31
+        run: ct install --config .ci/ct-config.yaml
+
+      - name: Create 1.32 kind cluster
+        uses: helm/kind-action@v1.12.0
+        with:
+          node_image: kindest/node:v1.32.2@sha256:f226345927d7e348497136874b6d207e0b32cc52154ad8323129352923a3142f
+          cluster_name: kubernetes-1.32
+        if: steps.list-changed.outputs.changed == 'true'
+
+      - name: Run chart-testing (install) against 1.32
+        run: ct install --config .ci/ct-config.yaml
