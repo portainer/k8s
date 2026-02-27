@@ -87,6 +87,15 @@ dbEncryption:
   #
   existingSecret: ""
 
+adminPassword:
+  # If set, will mount the existing secret into the pod and pass --admin-password-file to Portainer.
+  # The secret must contain a key named 'password' holding the plain text password.
+  # To create the secret:
+  #   kubectl create secret generic portainer-admin-password \
+  #     --from-literal=password=<plain_text_password> \
+  #     -n portainer
+  existingSecret: ""
+
 feature:
   flags: []
 

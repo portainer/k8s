@@ -51,6 +51,14 @@ spec:
               - key: secret
                 path: portainer
         {{- end }}
+        {{- if .Values.adminPassword.existingSecret }}
+        - name: admin-password
+          secret:
+            secretName: {{ .Values.adminPassword.existingSecret }}
+            items:
+              - key: password
+                path: admin-password
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- if .Values.enterpriseEdition.enabled }}
@@ -72,6 +80,9 @@ spec:
           - --mtlscacert=/certs/mtls/mtlsca.crt
           - --mtlscert=/certs/mtls/mtlscert.crt
           - --mtlskey=/certs/mtls/mtlskey.key
+          {{- end }}
+          {{- if .Values.adminPassword.existingSecret }}
+          - "--admin-password-file=/run/portainer/admin-password"
           {{- end }}
           {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
           - '--tunnel-port={{ .Values.service.edgeNodePort }}'
@@ -109,6 +120,12 @@ spec:
               mountPath: /run/secrets/portainer
               {{- end }}
               subPath: portainer
+              readOnly: true
+            {{- end }}
+            {{- if .Values.adminPassword.existingSecret }}
+            - name: admin-password
+              mountPath: /run/portainer/admin-password
+              subPath: admin-password
               readOnly: true
             {{- end }}
           ports:
