@@ -60,9 +60,15 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- end }}
-      {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
-          args:  [ '--tunnel-port','{{ .Values.service.edgeNodePort }}' ]
-      {{- end }}          
+          args:
+          {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
+            - '--tunnel-port'
+            - '{{ .Values.service.edgeNodePort }}'
+          {{- end }}          
+          {{- if (not (empty .Values.admin.password)) }}
+            - '--admin-password'
+            - '{{ .Values.admin.password }}'
+          {{- end }}          
           volumeMounts:
             {{- if .Values.persistence.enabled }}
             - name: data
