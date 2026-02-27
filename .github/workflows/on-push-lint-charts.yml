@@ -1,9 +1,9 @@
 name: Lint and Test Charts
 
-on: 
+on:
   # push:
   #   paths:
-  #     - 'charts/**' 
+  #     - 'charts/**'
   #     - '.github/**'
   pull_request:
     branches:
@@ -15,14 +15,21 @@ env:
   HELM_VERSION: v3.10.1
 
 jobs:
-  lint-test:
+
+  # ── Job 1: Lint ────────────────────────────────────────────────────────────
+  # Runs helm lint, kube-score, and ct lint. Exports charts-changed for the
+  # install-test job to decide whether to run cluster installs.
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
+    outputs:
+      charts-changed: ${{ steps.list-changed.outputs.changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          
+
       - name: Set up Helm
         uses: azure/setup-helm@v4.2.0
         with:
@@ -44,7 +51,6 @@ jobs:
               --ignore-test container-image-tag
               --enable-optional-test container-security-context-privileged
 
-      # python is a requirement for the chart-testing action below (supports yamllint among other tests)
       - uses: actions/setup-python@v5.3.0
         with:
           python-version: 3.13.1
@@ -54,54 +60,163 @@ jobs:
         with:
           version: v3.10.1
 
-      - name: Run chart-testing (list-changed)
+      - name: Check for chart changes
         id: list-changed
         run: |
           changed=$(ct list-changed --config .ci/ct-config.yaml)
-          if [[ -n "$changed" ]]; then
-            echo "::set-output name=changed::true"
+          # Always treat workflow_dispatch as changed so install tests run
+          if [[ -n "$changed" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Run chart-testing (lint)
         run: ct lint --config .ci/ct-config.yaml
 
-      # Refer to https://github.com/kubernetes-sigs/kind/releases when updating the node_images
-      - name: Create 1.32 kind cluster
+  # ── Job 2: Template tests ──────────────────────────────────────────────────
+  # Runs in parallel with lint. Uses `helm template` to render the chart with
+  # each feature enabled and asserts the output is correct. No cluster needed.
+  template-tests:
+    name: Template Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Run template tests
+        run: |
+          CHART="charts/portainer"
+          fail=0
+
+          check() {
+            local desc="$1" pattern="$2" output="$3"
+            if ! echo "$output" | grep -q "$pattern"; then
+              echo "FAIL [$desc]: expected '$pattern' not found"
+              fail=1
+            else
+              echo "PASS [$desc]"
+            fi
+          }
+
+          absent() {
+            local desc="$1" pattern="$2" output="$3"
+            if echo "$output" | grep -q "$pattern"; then
+              echo "FAIL [$desc]: unexpected '$pattern' found"
+              fail=1
+            else
+              echo "PASS [$desc]"
+            fi
+          }
+
+          # Default: tunnel-port rendered for NodePort with edgeNodePort set
+          out=$(helm template portainer "$CHART")
+          check "default: tunnel-port arg" "\-\-tunnel-port" "$out"
+
+          # tls.force: --http-disabled added, HTTP port 9000 removed
+          out=$(helm template portainer "$CHART" --set tls.force=true)
+          check  "tls.force: --http-disabled arg" "\-\-http-disabled" "$out"
+          absent "tls.force: no containerPort 9000" "containerPort: 9000" "$out"
+
+          # tls.existingSecret: cert args and volume mount
+          out=$(helm template portainer "$CHART" --set tls.existingSecret=my-tls)
+          check "tls.existingSecret: --tlscert arg"      "\-\-tlscert=/certs/tls.crt" "$out"
+          check "tls.existingSecret: --tlskey arg"       "\-\-tlskey=/certs/tls.key"  "$out"
+          check "tls.existingSecret: certs volumeMount"  "mountPath: /certs$"         "$out"
+
+          # mtls.existingSecret: mtls args and volume mount
+          out=$(helm template portainer "$CHART" --set mtls.existingSecret=my-mtls)
+          check "mtls: --mtlscacert arg"           "\-\-mtlscacert="      "$out"
+          check "mtls: --mtlscert arg"             "\-\-mtlscert="        "$out"
+          check "mtls: --mtlskey arg"              "\-\-mtlskey="         "$out"
+          check "mtls: mtlscerts volumeMount"      "mountPath: /certs/mtls" "$out"
+
+          # adminPassword.existingSecret: arg, volume, and volumeMount
+          out=$(helm template portainer "$CHART" --set adminPassword.existingSecret=my-pw)
+          check "adminPassword: --admin-password-file arg" "\-\-admin-password-file=/run/portainer/admin-password" "$out"
+          check "adminPassword: volume present"            "name: admin-password"                                  "$out"
+          check "adminPassword: volumeMount mountPath"     "mountPath: /run/portainer/admin-password"              "$out"
+
+          # dbEncryption CE: portainer-key volume, CE mountPath
+          out=$(helm template portainer "$CHART" --set dbEncryption.existingSecret=my-key)
+          check "dbEncryption CE: portainer-key volume" "name: portainer-key"           "$out"
+          check "dbEncryption CE: CE mountPath"         "mountPath: /run/secrets/portainer" "$out"
+
+          # dbEncryption EE: EE mountPath
+          out=$(helm template portainer "$CHART" \
+            --set enterpriseEdition.enabled=true \
+            --set dbEncryption.existingSecret=my-key)
+          check "dbEncryption EE: EE mountPath" "mountPath: /run/portainer/portainer" "$out"
+
+          # trusted_origins: --trusted-origins arg
+          out=$(helm template portainer "$CHART" \
+            --set trusted_origins.enabled=true \
+            --set trusted_origins.domains=portainer.example.com)
+          check "trusted_origins: --trusted-origins arg" "\-\-trusted-origins=" "$out"
+
+          # feature.flags: flag values rendered in args
+          out=$(helm template portainer "$CHART" --set "feature.flags={--feat-one}")
+          check "feature.flags: flag in args" "feat-one" "$out"
+
+          # extraEnv: env vars rendered on the container
+          out=$(helm template portainer "$CHART" \
+            --set "extraEnv[0].name=MY_VAR" \
+            --set "extraEnv[0].value=hello")
+          check "extraEnv: env var name rendered" "MY_VAR" "$out"
+
+          exit $fail
+
+  # ── Job 3: Install tests (matrix) ─────────────────────────────────────────
+  # Runs only when chart files have changed. Each k8s version gets its own
+  # runner so all four run in parallel. Cancelled on first failure.
+  install-test:
+    name: Install / k8s ${{ matrix.k8s-version }}
+    runs-on: ubuntu-latest
+    needs: [lint, template-tests]
+    if: needs.lint.outputs.charts-changed == 'true'
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          # Refer to https://github.com/kubernetes-sigs/kind/releases when updating node_images
+          - k8s-version: "1.32"
+            node_image: kindest/node:v1.32.11@sha256:5fc52d52a7b9574015299724bd68f183702956aa4a2116ae75a63cb574b35af8
+          - k8s-version: "1.33"
+            node_image: kindest/node:v1.33.7@sha256:d26ef333bdb2cbe9862a0f7c3803ecc7b4303d8cea8e814b481b09949d353040
+          - k8s-version: "1.34"
+            node_image: kindest/node:v1.34.3@sha256:08497ee19eace7b4b5348db5c6a1591d7752b164530a36f855cb0f2bdcbadd48
+          - k8s-version: "1.35"
+            node_image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - uses: actions/setup-python@v5.3.0
+        with:
+          python-version: 3.13.1
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.6.1
+        with:
+          version: v3.10.1
+
+      - name: Create kind cluster (k8s ${{ matrix.k8s-version }})
         uses: helm/kind-action@v1.12.0
         with:
-          node_image: kindest/node:v1.32.11@sha256:5fc52d52a7b9574015299724bd68f183702956aa4a2116ae75a63cb574b35af8
-          cluster_name: kubernetes-1.32
-        if: steps.list-changed.outputs.changed == 'true'
+          node_image: ${{ matrix.node_image }}
+          cluster_name: kubernetes-${{ matrix.k8s-version }}
 
-      - name: Run chart-testing (install) against 1.32
-        run: ct install --config .ci/ct-config.yaml
-
-      - name: Create 1.33 kind cluster
-        uses: helm/kind-action@v1.12.0
-        with:
-          node_image: kindest/node:v1.33.7@sha256:d26ef333bdb2cbe9862a0f7c3803ecc7b4303d8cea8e814b481b09949d353040
-          cluster_name: kubernetes-1.33
-        if: steps.list-changed.outputs.changed == 'true'
-
-      - name: Run chart-testing (install) against 1.33
-        run: ct install --config .ci/ct-config.yaml
-
-      - name: Create 1.34 kind cluster
-        uses: helm/kind-action@v1.12.0
-        with:
-          node_image: kindest/node:v1.34.3@sha256:08497ee19eace7b4b5348db5c6a1591d7752b164530a36f855cb0f2bdcbadd48
-          cluster_name: kubernetes-1.34
-        if: steps.list-changed.outputs.changed == 'true'
-
-      - name: Run chart-testing (install) against 1.34
-        run: ct install --config .ci/ct-config.yaml
-
-      - name: Create 1.35 kind cluster
-        uses: helm/kind-action@v1.12.0
-        with:
-          node_image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-          cluster_name: kubernetes-1.35
-        if: steps.list-changed.outputs.changed == 'true'
-
-      - name: Run chart-testing (install) against 1.35
+      - name: Run chart-testing (install)
         run: ct install --config .ci/ct-config.yaml
