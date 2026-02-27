@@ -60,9 +60,32 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- end }}
-      {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
-          args:  [ '--tunnel-port','{{ .Values.service.edgeNodePort }}' ]
-      {{- end }}          
+          args:
+          {{- if .Values.tls.force }}
+          - --http-disabled
+          {{- end }}
+          {{- if .Values.tls.existingSecret }}
+          - --tlscert=/certs/tls.crt
+          - --tlskey=/certs/tls.key
+          {{- end }}
+          {{- if .Values.mtls.existingSecret }}
+          - --mtlscacert=/certs/mtls/mtlsca.crt
+          - --mtlscert=/certs/mtls/mtlscert.crt
+          - --mtlskey=/certs/mtls/mtlskey.key
+          {{- end }}
+          {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.edgeNodePort))) }}
+          - '--tunnel-port={{ .Values.service.edgeNodePort }}'
+          {{- end }}
+          {{- if and .Values.trusted_origins.enabled (not (empty .Values.trusted_origins.domains)) }}
+          - '--trusted-origins={{ .Values.trusted_origins.domains | trim | quote }}'
+          {{- end }}
+          {{- range .Values.feature.flags }}
+          - {{ . | squote }}
+          {{- end }}
+          {{- with .Values.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             {{- if .Values.persistence.enabled }}
             - name: data
