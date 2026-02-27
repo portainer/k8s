@@ -169,6 +169,57 @@ jobs:
             --set "extraEnv[0].value=hello")
           check "extraEnv: env var name rendered" "MY_VAR" "$out"
 
+          # persistence.enabled=false: no data volume or volumeMount
+          out=$(helm template portainer "$CHART" --set persistence.enabled=false)
+          absent "persistence disabled: no data volume"      "name: data$"      "$out"
+          absent "persistence disabled: no data volumeMount" "mountPath: /data$" "$out"
+
+          # localMgmt=false: no serviceAccountName on the pod
+          out=$(helm template portainer "$CHART" --set localMgmt=false)
+          absent "localMgmt disabled: no serviceAccountName" "serviceAccountName" "$out"
+
+          # service.type=ClusterIP: no nodePort fields rendered
+          out=$(helm template portainer "$CHART" --set service.type=ClusterIP)
+          absent "ClusterIP: no nodePort fields" "nodePort:" "$out"
+
+          # ingress.enabled=true: Ingress resource present
+          out=$(helm template portainer "$CHART" --set ingress.enabled=true)
+          check "ingress enabled: Ingress resource" "kind: Ingress" "$out"
+
+          # tls.force + tls.existingSecret combined: both --http-disabled and --tlscert present
+          out=$(helm template portainer "$CHART" \
+            --set tls.force=true \
+            --set tls.existingSecret=my-tls)
+          check "tls combined: --http-disabled arg" "\-\-http-disabled"      "$out"
+          check "tls combined: --tlscert arg"       "\-\-tlscert=/certs/tls.crt" "$out"
+
+          # Volume name consistency: each secret volume name must appear in both
+          # volumes: and volumeMounts: (catches name mismatch regressions)
+          out=$(helm template portainer "$CHART" --set tls.existingSecret=my-tls)
+          [[ $(echo "$out" | grep -c "name: certs$") -ge 2 ]] \
+            && echo "PASS [volume consistency: certs]" \
+            || { echo "FAIL [volume consistency: certs]: name mismatch between volumes and volumeMounts"; fail=1; }
+
+          out=$(helm template portainer "$CHART" --set mtls.existingSecret=my-mtls)
+          [[ $(echo "$out" | grep -c "name: mtlscerts$") -ge 2 ]] \
+            && echo "PASS [volume consistency: mtlscerts]" \
+            || { echo "FAIL [volume consistency: mtlscerts]: name mismatch between volumes and volumeMounts"; fail=1; }
+
+          out=$(helm template portainer "$CHART" --set adminPassword.existingSecret=my-pw)
+          [[ $(echo "$out" | grep -c "name: admin-password$") -ge 2 ]] \
+            && echo "PASS [volume consistency: admin-password]" \
+            || { echo "FAIL [volume consistency: admin-password]: name mismatch between volumes and volumeMounts"; fail=1; }
+
+          out=$(helm template portainer "$CHART" --set dbEncryption.existingSecret=my-key)
+          [[ $(echo "$out" | grep -c "name: portainer-key$") -ge 2 ]] \
+            && echo "PASS [volume consistency: portainer-key]" \
+            || { echo "FAIL [volume consistency: portainer-key]: name mismatch between volumes and volumeMounts"; fail=1; }
+
+          # EE image selection: enterpriseEdition.enabled=true must use the EE image
+          out=$(helm template portainer "$CHART" --set enterpriseEdition.enabled=true)
+          check  "EE enabled: EE image used"  "portainer-ee" "$out"
+          absent "EE enabled: CE image absent" "portainer-ce" "$out"
+
           exit $fail
 
   # ── Job 3: Install tests (matrix) ─────────────────────────────────────────
