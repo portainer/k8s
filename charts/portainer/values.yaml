@@ -81,6 +81,10 @@ dbEncryption:
   #     --from-literal=secret=<your-encryption-key> \
   #     -n portainer
   #
+  # The mount path is determined automatically based on the enterpriseEdition.enabled value:
+  #   - CE (enterpriseEdition.enabled: false): /run/secrets/portainer
+  #   - EE (enterpriseEdition.enabled: true):  /run/portainer/portainer
+  #
   existingSecret: ""
 
 feature:

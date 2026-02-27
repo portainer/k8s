@@ -44,7 +44,7 @@ spec:
             secretName: {{ .Values.mtls.existingSecret }}
         {{- end }}
         {{- if .Values.dbEncryption.existingSecret }}
-        - name: db-encryption-key
+        - name: portainer-key
           secret:
             secretName: {{ .Values.dbEncryption.existingSecret }}
             items:
@@ -102,8 +102,12 @@ spec:
               readOnly: true
             {{- end }}
             {{- if .Values.dbEncryption.existingSecret }}
-            - name: db-encryption-key
+            - name: portainer-key
+              {{- if .Values.enterpriseEdition.enabled }}
               mountPath: /run/portainer/portainer
+              {{- else }}
+              mountPath: /run/secrets/portainer
+              {{- end }}
               subPath: portainer
               readOnly: true
             {{- end }}
