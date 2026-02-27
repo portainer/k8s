@@ -14,7 +14,6 @@ jobs:
     permissions:
       contents: write
       pages: write
-      pull-requests: write
     steps:
     - uses: actions/checkout@v2
 
@@ -31,9 +30,11 @@ jobs:
       env:
         CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-    - name: sync gh-pages branch
-      uses: repo-sync/pull-request@v2
-      with:
-        destination_branch: "gh-pages"
-        github_token: "${{ secrets.GITHUB_TOKEN }}"
-        pr_allow_empty: false
+    - name: Publish docs to gh-pages
+      run: |
+        git fetch origin gh-pages
+        git checkout gh-pages
+        git checkout master -- README.md charts/portainer/README.md
+        git add README.md charts/portainer/README.md
+        git diff --cached --quiet || git commit -m "Sync docs from master"
+        git push origin gh-pages
