@@ -9,8 +9,13 @@ enterpriseEdition:
   enabled: false
   image:
     repository: portainer/portainer-ee
+<<<<<<< HEAD
     tag: 2.39.0
     pullPolicy: Always
+=======
+    tag: 2.0.0
+    pullPolicy: IfNotPresent
+>>>>>>> gh-pages
 
 image:
   repository: portainer/portainer-ce
@@ -20,7 +25,10 @@ image:
 imagePullSecrets: []
 
 nodeSelector: {}
+<<<<<<< HEAD
 tolerations: []
+=======
+>>>>>>> gh-pages
 
 serviceAccount:
   annotations: {}
@@ -120,7 +128,10 @@ extraEnv: []
 resources: {}
 
 persistence:
+<<<<<<< HEAD
   enabled: true
+=======
+>>>>>>> gh-pages
   size: "10Gi"
   annotations: {}
   storageClass:

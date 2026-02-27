@@ -36,6 +36,8 @@ helm repo update
 
 ## Community Edition
 
+## Community Edition
+
 Install the helm chart:
 
 ### Using NodePort on a local/remote cluster
@@ -62,6 +64,8 @@ helm install --create-namespace -n portainer portainer portainer/portainer \
 For advanced helm customization, see the [chart README](/charts/portainer/README.md)
 
 ## Enterprise Edition
+
+## Community Edition
 
 ### Using NodePort on a local/remote cluster
 
