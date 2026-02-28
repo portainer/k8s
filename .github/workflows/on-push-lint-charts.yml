@@ -1,10 +1,6 @@
 name: Lint and Test Charts
 
 on:
-  # push:
-  #   paths:
-  #     - 'charts/**'
-  #     - '.github/**'
   pull_request:
     branches:
       - master
@@ -12,18 +8,15 @@ on:
 
 env:
   KUBE_SCORE_VERSION: 1.10.0
-  HELM_VERSION: v3.10.1
+  HELM_VERSION: v4.1.1
 
 jobs:
 
   # ── Job 1: Lint ────────────────────────────────────────────────────────────
-  # Runs helm lint, kube-score, and ct lint. Exports charts-changed for the
-  # install-test job to decide whether to run cluster installs.
+  # Runs helm lint, kube-score, and ct lint.
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    outputs:
-      charts-changed: ${{ steps.list-changed.outputs.changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -60,17 +53,6 @@ jobs:
         with:
           version: v3.10.1
 
-      - name: Check for chart changes
-        id: list-changed
-        run: |
-          changed=$(ct list-changed --config .ci/ct-config.yaml)
-          # Always treat workflow_dispatch as changed so install tests run
-          if [[ -n "$changed" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Run chart-testing (lint)
         run: ct lint --config .ci/ct-config.yaml
 
@@ -83,6 +65,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Set up Helm
         uses: azure/setup-helm@v4.2.0
@@ -114,6 +98,13 @@ jobs:
             fi
           }
 
+          vol_consistent() {
+            local desc="$1" name="$2" output="$3"
+            [[ $(echo "$output" | grep -c "name: ${name}$") -ge 2 ]] \
+              && echo "PASS [volume consistency: $desc]" \
+              || { echo "FAIL [volume consistency: $desc]: name mismatch between volumes and volumeMounts"; fail=1; }
+          }
+
           # Default: tunnel-port rendered for NodePort with edgeNodePort set
           out=$(helm template portainer "$CHART")
           check "default: tunnel-port arg" "\-\-tunnel-port" "$out"
@@ -128,24 +119,28 @@ jobs:
           check "tls.existingSecret: --tlscert arg"      "\-\-tlscert=/certs/tls.crt" "$out"
           check "tls.existingSecret: --tlskey arg"       "\-\-tlskey=/certs/tls.key"  "$out"
           check "tls.existingSecret: certs volumeMount"  "mountPath: /certs$"         "$out"
+          vol_consistent "certs" "certs" "$out"
 
           # mtls.existingSecret: mtls args and volume mount
           out=$(helm template portainer "$CHART" --set mtls.existingSecret=my-mtls)
-          check "mtls: --mtlscacert arg"           "\-\-mtlscacert="      "$out"
-          check "mtls: --mtlscert arg"             "\-\-mtlscert="        "$out"
-          check "mtls: --mtlskey arg"              "\-\-mtlskey="         "$out"
-          check "mtls: mtlscerts volumeMount"      "mountPath: /certs/mtls" "$out"
+          check "mtls: --mtlscacert arg"      "\-\-mtlscacert="        "$out"
+          check "mtls: --mtlscert arg"        "\-\-mtlscert="          "$out"
+          check "mtls: --mtlskey arg"         "\-\-mtlskey="           "$out"
+          check "mtls: mtlscerts volumeMount" "mountPath: /certs/mtls" "$out"
+          vol_consistent "mtlscerts" "mtlscerts" "$out"
 
           # adminPassword.existingSecret: arg, volume, and volumeMount
           out=$(helm template portainer "$CHART" --set adminPassword.existingSecret=my-pw)
           check "adminPassword: --admin-password-file arg" "\-\-admin-password-file=/run/portainer/admin-password" "$out"
           check "adminPassword: volume present"            "name: admin-password"                                  "$out"
           check "adminPassword: volumeMount mountPath"     "mountPath: /run/portainer/admin-password"              "$out"
+          vol_consistent "admin-password" "admin-password" "$out"
 
           # dbEncryption CE: portainer-key volume, CE mountPath
           out=$(helm template portainer "$CHART" --set dbEncryption.existingSecret=my-key)
-          check "dbEncryption CE: portainer-key volume" "name: portainer-key"           "$out"
+          check "dbEncryption CE: portainer-key volume" "name: portainer-key"              "$out"
           check "dbEncryption CE: CE mountPath"         "mountPath: /run/secrets/portainer" "$out"
+          vol_consistent "portainer-key" "portainer-key" "$out"
 
           # dbEncryption EE: EE mountPath
           out=$(helm template portainer "$CHART" \
@@ -186,50 +181,79 @@ jobs:
           out=$(helm template portainer "$CHART" --set ingress.enabled=true)
           check "ingress enabled: Ingress resource" "kind: Ingress" "$out"
 
-          # tls.force + tls.existingSecret combined: both --http-disabled and --tlscert present
-          out=$(helm template portainer "$CHART" \
-            --set tls.force=true \
-            --set tls.existingSecret=my-tls)
-          check "tls combined: --http-disabled arg" "\-\-http-disabled"      "$out"
-          check "tls combined: --tlscert arg"       "\-\-tlscert=/certs/tls.crt" "$out"
-
-          # Volume name consistency: each secret volume name must appear in both
-          # volumes: and volumeMounts: (catches name mismatch regressions)
-          out=$(helm template portainer "$CHART" --set tls.existingSecret=my-tls)
-          [[ $(echo "$out" | grep -c "name: certs$") -ge 2 ]] \
-            && echo "PASS [volume consistency: certs]" \
-            || { echo "FAIL [volume consistency: certs]: name mismatch between volumes and volumeMounts"; fail=1; }
-
-          out=$(helm template portainer "$CHART" --set mtls.existingSecret=my-mtls)
-          [[ $(echo "$out" | grep -c "name: mtlscerts$") -ge 2 ]] \
-            && echo "PASS [volume consistency: mtlscerts]" \
-            || { echo "FAIL [volume consistency: mtlscerts]: name mismatch between volumes and volumeMounts"; fail=1; }
-
-          out=$(helm template portainer "$CHART" --set adminPassword.existingSecret=my-pw)
-          [[ $(echo "$out" | grep -c "name: admin-password$") -ge 2 ]] \
-            && echo "PASS [volume consistency: admin-password]" \
-            || { echo "FAIL [volume consistency: admin-password]: name mismatch between volumes and volumeMounts"; fail=1; }
-
-          out=$(helm template portainer "$CHART" --set dbEncryption.existingSecret=my-key)
-          [[ $(echo "$out" | grep -c "name: portainer-key$") -ge 2 ]] \
-            && echo "PASS [volume consistency: portainer-key]" \
-            || { echo "FAIL [volume consistency: portainer-key]: name mismatch between volumes and volumeMounts"; fail=1; }
-
           # EE image selection: enterpriseEdition.enabled=true must use the EE image
           out=$(helm template portainer "$CHART" --set enterpriseEdition.enabled=true)
           check  "EE enabled: EE image used"  "portainer-ee" "$out"
           absent "EE enabled: CE image absent" "portainer-ce" "$out"
 
+          # tls.force + tls.existingSecret combined: both --http-disabled and --tlscert present
+          out=$(helm template portainer "$CHART" \
+            --set tls.force=true \
+            --set tls.existingSecret=my-tls)
+          check "tls combined: --http-disabled arg" "\-\-http-disabled"        "$out"
+          check "tls combined: --tlscert arg"       "\-\-tlscert=/certs/tls.crt" "$out"
+
+          # Full TLS stack: tls.force + cert secret + mTLS all together
+          out=$(helm template portainer "$CHART" \
+            --set tls.force=true \
+            --set tls.existingSecret=my-tls \
+            --set mtls.existingSecret=my-mtls)
+          check  "full TLS stack: --http-disabled"       "\-\-http-disabled"       "$out"
+          check  "full TLS stack: --tlscert"             "\-\-tlscert="            "$out"
+          check  "full TLS stack: --mtlscacert"          "\-\-mtlscacert="         "$out"
+          absent "full TLS stack: no containerPort 9000" "containerPort: 9000"     "$out"
+          vol_consistent "certs"     "certs"     "$out"
+          vol_consistent "mtlscerts" "mtlscerts" "$out"
+
+          # Full security stack: every secret-backed feature enabled at once
+          out=$(helm template portainer "$CHART" \
+            --set tls.existingSecret=my-tls \
+            --set mtls.existingSecret=my-mtls \
+            --set adminPassword.existingSecret=my-pw \
+            --set dbEncryption.existingSecret=my-key)
+          check "full security stack: --tlscert"             "\-\-tlscert="                      "$out"
+          check "full security stack: --mtlscacert"          "\-\-mtlscacert="                   "$out"
+          check "full security stack: --admin-password-file" "\-\-admin-password-file="          "$out"
+          check "full security stack: portainer-key volume"  "name: portainer-key"               "$out"
+          check "full security stack: CE mountPath"          "mountPath: /run/secrets/portainer" "$out"
+          vol_consistent "certs"          "certs"          "$out"
+          vol_consistent "mtlscerts"      "mtlscerts"      "$out"
+          vol_consistent "admin-password" "admin-password" "$out"
+          vol_consistent "portainer-key"  "portainer-key"  "$out"
+
+          # EE full stack: EE image + dbEncryption + adminPassword + tls.force
+          out=$(helm template portainer "$CHART" \
+            --set enterpriseEdition.enabled=true \
+            --set dbEncryption.existingSecret=my-key \
+            --set adminPassword.existingSecret=my-pw \
+            --set tls.force=true)
+          check  "EE full stack: EE image"              "portainer-ee"                        "$out"
+          absent "EE full stack: no CE image"           "portainer-ce"                        "$out"
+          check  "EE full stack: EE dbEncryption path"  "mountPath: /run/portainer/portainer" "$out"
+          check  "EE full stack: --http-disabled"       "\-\-http-disabled"                   "$out"
+          check  "EE full stack: --admin-password-file" "\-\-admin-password-file="            "$out"
+
+          # Combined extras: feature flags + trusted_origins + extraEnv together
+          out=$(helm template portainer "$CHART" \
+            --set "feature.flags={--feat-one,--feat-two}" \
+            --set trusted_origins.enabled=true \
+            --set trusted_origins.domains=portainer.example.com \
+            --set "extraEnv[0].name=MY_VAR" \
+            --set "extraEnv[0].value=hello")
+          check "combined extras: feat-one flag"      "feat-one"             "$out"
+          check "combined extras: feat-two flag"      "feat-two"             "$out"
+          check "combined extras: --trusted-origins"  "\-\-trusted-origins=" "$out"
+          check "combined extras: extraEnv MY_VAR"    "MY_VAR"               "$out"
+
           exit $fail
 
   # ── Job 3: Install tests (matrix) ─────────────────────────────────────────
-  # Runs only when chart files have changed. Each k8s version gets its own
-  # runner so all four run in parallel. Cancelled on first failure.
+  # Always runs. Each k8s version gets its own runner so all four run in
+  # parallel. Cancelled on first failure.
   install-test:
     name: Install / k8s ${{ matrix.k8s-version }}
     runs-on: ubuntu-latest
     needs: [lint, template-tests]
-    if: needs.lint.outputs.charts-changed == 'true'
     strategy:
       fail-fast: true
       matrix:
@@ -271,3 +295,26 @@ jobs:
 
       - name: Run chart-testing (install)
         run: ct install --config .ci/ct-config.yaml
+
+  # ── Job 4: Report status ───────────────────────────────────────────────────
+  # Always runs. Fails if any upstream job failed or was cancelled.
+  # Configure "Lint and Test Charts / report-status" as a required PR check.
+  report-status:
+    name: report-status
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [lint, template-tests, install-test]
+    steps:
+      - name: Report
+        run: |
+          results='${{ toJSON(needs) }}'
+          echo "Job results: $results"
+          if echo "$results" | grep -q '"result": "failure"'; then
+            echo "One or more jobs failed"
+            exit 1
+          fi
+          if echo "$results" | grep -q '"result": "cancelled"'; then
+            echo "One or more jobs were cancelled"
+            exit 1
+          fi
+          echo "All jobs passed"
