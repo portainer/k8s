@@ -15,7 +15,7 @@ jobs:
 
   # ── Job 1: Advanced install tests ─────────────────────────────────────────
   # Three sequential scenarios each in their own namespace on a single KIND
-  # cluster (k8s 1.35). Only triggered when template files change.
+  # cluster (k8s 1.35).
   advanced-install-test:
     name: Install / k8s 1.35
     runs-on: ubuntu-latest
