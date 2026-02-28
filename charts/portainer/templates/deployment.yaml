@@ -77,7 +77,7 @@ spec:
           - '--tunnel-port={{ .Values.service.edgeNodePort }}'
           {{- end }}
           {{- if and .Values.trusted_origins.enabled (not (empty .Values.trusted_origins.domains)) }}
-          - '--trusted-origins={{ .Values.trusted_origins.domains | trim | quote }}'
+          - '--trusted-origins={{ .Values.trusted_origins.domains | trim }}'
           {{- end }}
           {{- range .Values.feature.flags }}
           - {{ . | squote }}
