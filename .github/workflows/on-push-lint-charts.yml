@@ -300,7 +300,7 @@ jobs:
   # Always runs. Fails if any upstream job failed or was cancelled.
   # Configure "Lint and Test Charts / report-status" as a required PR check.
   report-status:
-    name: report-status
+    name: validate
     runs-on: ubuntu-latest
     if: always()
     needs: [lint, template-tests, install-test]

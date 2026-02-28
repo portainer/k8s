@@ -17,7 +17,7 @@ jobs:
   # Three sequential scenarios each in their own namespace on a single KIND
   # cluster (k8s 1.35). Only triggered when template files change.
   advanced-install-test:
-    name: Advanced Install Test (KIND k8s 1.35)
+    name: Install / k8s 1.35
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -104,7 +104,7 @@ jobs:
   # ── Job 2: Report status ───────────────────────────────────────────────────
   # Always runs. Fails if the install job failed or was cancelled.
   report-status:
-    name: report-status
+    name: validate
     runs-on: ubuntu-latest
     if: always()
     needs: [advanced-install-test]
