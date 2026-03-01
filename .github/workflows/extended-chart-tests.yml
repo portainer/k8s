@@ -1,0 +1,124 @@
+name: Extended Chart Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'charts/portainer/templates/**'
+  workflow_dispatch:
+
+env:
+  HELM_VERSION: v4.1.1
+
+jobs:
+
+  # ── Job 1: Advanced install tests ─────────────────────────────────────────
+  # Three sequential scenarios each in their own namespace on a single KIND
+  # cluster (k8s 1.35).
+  advanced-install-test:
+    name: Install / k8s 1.35
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Create KIND cluster (k8s 1.35)
+        uses: helm/kind-action@v1.12.0
+        with:
+          node_image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+          cluster_name: kubernetes-1-35
+
+      # ── Scenario 1: adminPassword ──────────────────────────────────────────
+      - name: "Scenario 1: adminPassword — create namespace + secret"
+        run: |
+          kubectl create namespace portainer-adm
+          kubectl create secret generic portainer-admin-password \
+            --from-literal=password=testpassword123 -n portainer-adm
+
+      - name: "Scenario 1: adminPassword — helm install"
+        run: |
+          helm install portainer charts/portainer -n portainer-adm \
+            --set adminPassword.existingSecret=portainer-admin-password \
+            --wait --timeout 120s
+
+      - name: "Scenario 1: adminPassword — verify rollout"
+        run: kubectl rollout status deployment/portainer -n portainer-adm --timeout=120s
+
+      - name: "Scenario 1: adminPassword — cleanup"
+        if: always()
+        run: |
+          helm uninstall portainer -n portainer-adm --ignore-not-found || true
+          kubectl delete namespace portainer-adm --ignore-not-found || true
+
+      # ── Scenario 2: dbEncryption ───────────────────────────────────────────
+      - name: "Scenario 2: dbEncryption — create namespace + secret"
+        run: |
+          kubectl create namespace portainer-enc
+          kubectl create secret generic portainer-key \
+            --from-literal=secret=test-encryption-key-for-ci-0 -n portainer-enc
+
+      - name: "Scenario 2: dbEncryption — helm install"
+        run: |
+          helm install portainer charts/portainer -n portainer-enc \
+            --set dbEncryption.existingSecret=portainer-key \
+            --wait --timeout 120s
+
+      - name: "Scenario 2: dbEncryption — verify rollout"
+        run: kubectl rollout status deployment/portainer -n portainer-enc --timeout=120s
+
+      - name: "Scenario 2: dbEncryption — cleanup"
+        if: always()
+        run: |
+          helm uninstall portainer -n portainer-enc --ignore-not-found || true
+          kubectl delete namespace portainer-enc --ignore-not-found || true
+
+      # ── Scenario 3: TLS force + self-signed cert ───────────────────────────
+      - name: "Scenario 3: TLS force — create namespace + self-signed cert secret"
+        run: |
+          kubectl create namespace portainer-tls
+          openssl req -x509 -nodes -newkey rsa:2048 -keyout tls.key -out tls.crt \
+            -days 1 -subj "/CN=portainer.local/O=CI"
+          kubectl create secret tls portainer-tls --cert=tls.crt --key=tls.key -n portainer-tls
+
+      - name: "Scenario 3: TLS force — helm install"
+        run: |
+          helm install portainer charts/portainer -n portainer-tls \
+            --set tls.force=true --set tls.existingSecret=portainer-tls \
+            --wait --timeout 120s
+
+      - name: "Scenario 3: TLS force — verify rollout"
+        run: kubectl rollout status deployment/portainer -n portainer-tls --timeout=120s
+
+      - name: "Scenario 3: TLS force — cleanup"
+        if: always()
+        run: |
+          helm uninstall portainer -n portainer-tls --ignore-not-found || true
+          kubectl delete namespace portainer-tls --ignore-not-found || true
+
+  # ── Job 2: Report status ───────────────────────────────────────────────────
+  # Always runs. Fails if the install job failed or was cancelled.
+  report-status:
+    name: validate
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [advanced-install-test]
+    steps:
+      - name: Report
+        run: |
+          results='${{ toJSON(needs) }}'
+          echo "Job results: $results"
+          if echo "$results" | grep -q '"result": "failure"'; then
+            echo "One or more jobs failed"
+            exit 1
+          fi
+          if echo "$results" | grep -q '"result": "cancelled"'; then
+            echo "One or more jobs were cancelled"
+            exit 1
+          fi
+          echo "All jobs passed"

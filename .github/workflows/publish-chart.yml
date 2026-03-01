@@ -34,7 +34,7 @@ jobs:
       run: |
         git fetch origin gh-pages
         git checkout gh-pages
-        git checkout master -- README.md charts/portainer/README.md
-        git add README.md charts/portainer/README.md
+        git checkout master -- README.md charts/portainer/README.md VERSIONING.md
+        git add README.md charts/portainer/README.md VERSIONING.md
         git diff --cached --quiet || git commit -m "Sync docs from master"
         git push origin gh-pages

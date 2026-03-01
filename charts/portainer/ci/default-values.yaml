@@ -1,0 +1,4 @@
+# Test scenario: default values (NodePort service, CE image)
+# This file exists so ct install runs a default-values test alongside other
+# ci/ scenarios. Without it, ct skips the default install when any ci/ file
+# is present.
