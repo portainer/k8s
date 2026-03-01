@@ -1,5 +1,9 @@
 
-This repo contains helm and YAML for deploying Portainer into a Kubernetes environment. Follow the applicable instructions for your edition / deployment methodology below:
+![Helm Chart Version](https://img.shields.io/github/v/release/portainer/k8s?label=Helm%20Chart&color=blue)
+[![Standard Chart Tests](https://github.com/portainer/k8s/actions/workflows/standard-chart-tests.yml/badge.svg)](https://github.com/portainer/k8s/actions/workflows/standard-chart-tests.yml)
+[![Extended Chart Tests](https://github.com/portainer/k8s/actions/workflows/extended-chart-tests.yml/badge.svg)](https://github.com/portainer/k8s/actions/workflows/extended-chart-tests.yml)
+
+This repo contains helm and YAML for deploying Portainer into a Kubernetes environment. Chart versions follow a Portainer-aligned versioning scheme — see [VERSIONING.md](VERSIONING.md) for details. Follow the applicable instructions for your edition / deployment methodology below:
 
 - [Deploying with Helm](#deploying-with-helm)
   - [Community Edition](#community-edition)
