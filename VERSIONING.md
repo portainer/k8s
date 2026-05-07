@@ -22,7 +22,7 @@ The Portainer major and minor version numbers are concatenated to form the chart
 | 2.39.0 | 239.0.1 | Chart bug fix, no change to Portainer version |
 | 2.39.0 | 239.0.2 | New Helm feature added (e.g. new values option) |
 | 2.39.1 | 239.1.0 | Portainer patch release — chart patch resets to 0 |
-| 2.39.2 | 239.2.0 | Chart bug fix against Portainer 2.39.2 |
+| 2.39.2 | 239.2.0 | Portainer patch release |
 | 2.45.0 | 245.0.0 | New Portainer LTS — major version bumps, chart patch resets to 0 |
 
 ## Rationale
