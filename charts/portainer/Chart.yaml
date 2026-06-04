@@ -16,11 +16,11 @@ type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
-version: 239.2.0
+version: 239.3.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application.
-appVersion: ce-latest-ee-2.39.2
+appVersion: ce-latest-ee-2.39.3
 
 sources:
     - https://github.com/portainer/k8s
