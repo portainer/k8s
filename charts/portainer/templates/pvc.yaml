@@ -22,6 +22,9 @@ spec:
   {{- if .Values.persistence.storageClass }}
   storageClassName: {{ .Values.persistence.storageClass | quote }}
   {{ end }}
+  {{- if .Values.persistence.volumeName }}
+  volumeName: {{ .Values.persistence.volumeName | quote }}
+  {{- end }}
   {{- if .Values.persistence.selector }}
   selector:
 {{ toYaml .Values.persistence.selector | indent 4 }}
