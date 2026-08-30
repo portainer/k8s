@@ -1,10 +1,9 @@
 # Deploy Portainer using Helm Chart
 
-Before proceeding, ensure to create a namespace in advance.
-For instance:
-```bash
-kubectl create namespace portainer
-```
+Before proceeding, create or use a namespace for Portainer.
+
+- Preferred (Helm 3.2+): include `--create-namespace` in your install/upgrade command.
+- Alternative: create the namespace with `kubectl create namespace portainer` first.
 
 # Install the chart repository
 
@@ -17,14 +16,14 @@ helm repo update
 Execute the following for testing the chart:
 
 ```bash
-helm install --dry-run --debug portainer -n portainer deploy/helm/portainer
+helm install --dry-run --debug --create-namespace -n portainer portainer deploy/helm/portainer
 ```
 
 # Installing the Chart
 Execute the following for installing the chart:
 
 ```bash
-helm upgrade -i -n portainer portainer portainer/portainer
+helm upgrade -i --create-namespace -n portainer portainer portainer/portainer
 
 ## Refer to the output NOTES on how-to access Portainer web
 ## An example is attached below
