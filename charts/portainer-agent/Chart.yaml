@@ -1,0 +1,42 @@
+# Chart metadata
+apiVersion: v2
+name: portainer-agent
+description: A Helm chart for Portainer Agent
+type: application
+version: 1.0.0
+appVersion: "2.27.4"
+
+# Chart icon and keywords for discovery
+icon: https://portainer.io/images/logo.svg
+keywords:
+  - portainer
+  - agent
+  - kubernetes
+  - container
+  - management
+  - edge
+
+# Project information
+home: https://www.portainer.io
+sources:
+  - https://github.com/portainer/portainer
+
+# Maintainer information
+maintainers:
+  - name: Portainer
+    email: platform-team@portainer.io
+    url: https://www.portainer.io
+
+# ArtifactHub annotations
+annotations:
+  # Category for ArtifactHub listing
+  category: Infrastructure
+  
+  # Change log for ArtifactHub
+  artifacthub.io/changes: |
+    - Initial release of the Portainer Agent Helm chart
+  
+  # Container images used by the chart
+  artifacthub.io/images: |
+    - name: portainer-agent
+      image: portainer/agent:2.27.4
