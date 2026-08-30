@@ -36,7 +36,7 @@ spec:
       targetPort: {{ .Values.service.edgeNodePort }}
       {{- else }}
     - port: {{ .Values.service.edgePort }}
-      targetPort: {{ .Values.service.edgePort }}
+      targetPort: {{ default .Values.service.edgePort .Values.service.edgeTargetPort }}
       {{- end }}
       protocol: TCP
       name: edge
