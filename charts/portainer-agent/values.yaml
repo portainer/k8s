@@ -1,0 +1,143 @@
+# Default values for portainer-agent.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Deployment mode configuration
+# Valid values: "agent", "edge", "edge-async"
+# - agent: Standard Portainer Agent for Kubernetes management
+# - edge: Edge Agent for remote environment management
+# - edge-async: Edge Agent with async communication
+deploymentMode: "agent"
+
+# Number of replicas to deploy
+# For production, consider using 2 or more for high availability
+replicaCount: 1
+
+# Image configuration
+image:
+  # Container image repository
+  # Official Portainer Agent repository
+  repository: portainer/agent
+  # Image pull policy
+  pullPolicy: Always
+  # Image tag (version)
+  # Use :lts for Long Term Support version
+  tag: lts
+
+# Edge specific configuration
+# Required when deploymentMode is "edge" or "edge-async"
+edge:
+  # Enable edge mode features
+  enabled: false
+  # Edge ID from Portainer
+  id: ""
+  # Edge key from Portainer
+  key: ""
+
+# Service configuration
+service:
+  # Service type
+  # Valid values: ClusterIP, NodePort, LoadBalancer
+  type: ClusterIP
+  # Port number for the service
+  port: 9001
+  # NodePort number (only used when type is NodePort)
+  nodePort: 30775
+  # Annotations for the service
+  annotations: {}
+  # Labels for the service
+  labels: {}
+
+# Ingress configuration
+# Note: Ingress is typically not needed for Portainer Agent as it communicates
+# outbound to Portainer Server. However, it's included here for flexibility
+# in case you need to expose the agent's API directly.
+ingress:
+  # Enable ingress
+  enabled: false
+  # Ingress annotations
+  annotations: {}
+    # Example:
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  # Ingress hosts configuration
+  hosts:
+    - host: agent.portainer.io
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: portainer-agent
+              port:
+                number: 9001
+  # TLS configuration
+  tls: []
+    # Example:
+    # - secretName: portainer-agent-tls
+    #   hosts:
+    #     - agent.portainer.io
+
+# Service account configuration
+serviceAccount:
+  # Create a service account
+  create: true
+  # Annotations for the service account
+  annotations: {}
+  # Name of the service account to use
+  # If not set, a name is generated using the fullname template
+  name: ""
+
+# Pod security context
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# Container security context
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# Resource limits and requests
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Node selector for pod placement
+nodeSelector: {}
+
+# Affinity rules for pod scheduling
+affinity: {}
+
+# Tolerations for pod scheduling
+tolerations: []
+
+# Pod annotations
+podAnnotations: {}
+
+# Feature flags for the agent
+feature:
+  flags: []
+    # Example:
+    # - "--pull-limit-check-disabled"
+
+# Extra environment variables
+extraEnv: []
+  # Example:
+  # - name: LOG_LEVEL
+  #   value: DEBUG
+
+# Image pull secrets
+imagePullSecrets: []
+  # Example:
+  # - name: regcred
+
+nameOverride: ""
+fullnameOverride: "" 
