@@ -15,24 +15,35 @@ jobs:
 
   # ── Job 1: Advanced install tests ─────────────────────────────────────────
   # Three sequential scenarios each in their own namespace on a single KIND
-  # cluster (k8s 1.35).
+  # cluster, run against the two latest k8s versions in parallel. Not
+  # fail-fast, so a failure shows whether it is version-specific.
   advanced-install-test:
-    name: Install / k8s 1.35
+    name: Install / k8s ${{ matrix.k8s-version }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Keep in sync with the two newest versions in standard-chart-tests.yml
+          # Refer to https://github.com/kubernetes-sigs/kind/releases when updating node_images
+          - k8s-version: "1.36"
+            node_image: kindest/node:v1.36.4@sha256:099e049362a1526b2db71494e1947aae99bd16290d7c895f2b7ea312e3cbfaed
+          - k8s-version: "1.37"
+            node_image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Helm
-        uses: azure/setup-helm@v4.2.0
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
           version: ${{ env.HELM_VERSION }}
 
-      - name: Create KIND cluster (k8s 1.35)
-        uses: helm/kind-action@v1.12.0
+      - name: Create KIND cluster (k8s ${{ matrix.k8s-version }})
+        uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1
         with:
-          node_image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-          cluster_name: kubernetes-1-35
+          node_image: ${{ matrix.node_image }}
+          cluster_name: kubernetes-${{ matrix.k8s-version }}
 
       # ── Scenario 1: adminPassword ──────────────────────────────────────────
       - name: "Scenario 1: adminPassword — create namespace + secret"
