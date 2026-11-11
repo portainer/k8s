@@ -3,6 +3,24 @@ entries:
   portainer:
   - apiVersion: v2
     appVersion: ce-latest-ee-2.45.3
+    created: "2026-11-11T03:13:46.017079065Z"
+    description: Helm chart used to deploy the Portainer for Kubernetes
+    digest: 75df6a2b85dcfab61a019ba8ee3dbdf87ac3747f456510e23baec90e2e94fccb
+    home: https://www.portainer.io
+    icon: https://github.com/portainer/portainer/raw/HEAD/app/assets/ico/apple-touch-icon.png
+    maintainers:
+    - email: platform-team@portainer.io
+      name: Portainer
+      url: https://www.portainer.io
+    name: portainer
+    sources:
+    - https://github.com/portainer/k8s
+    type: application
+    urls:
+    - https://github.com/portainer/k8s/releases/download/portainer-245.3.1/portainer-245.3.1.tgz
+    version: 245.3.1
+  - apiVersion: v2
+    appVersion: ce-latest-ee-2.45.3
     created: "2026-10-22T07:28:02.731752876Z"
     description: Helm chart used to deploy the Portainer for Kubernetes
     digest: 8a161cb74a87e865fcae0235d9f80d09c300e75f1c7750b0cb680756f583fc41
@@ -1675,4 +1693,4 @@ entries:
     urls:
     - https://github.com/portainer/charts/releases/download/portainer-0.0.1-fp1/portainer-0.0.1-fp1.tgz
     version: 0.0.1-fp1
-generated: "2026-10-22T07:28:02.732000963Z"
+generated: "2026-11-11T03:13:46.017274415Z"
