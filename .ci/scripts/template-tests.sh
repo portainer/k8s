@@ -109,6 +109,31 @@ absent "ClusterIP: no nodePort fields" "nodePort:" "$out"
 out=$(helm template portainer "$CHART" --set ingress.enabled=true)
 check "ingress enabled: Ingress resource" "kind: Ingress" "$out"
 
+# Ingress backends must use configured service ports for both API variants.
+out=$(helm template portainer "$CHART" --show-only templates/ingress.yaml \
+  --set "ingress.hosts[0].paths[0].path=/" \
+  --set ingress.enabled=true,service.httpPort=8080)
+check "ingress HTTP: custom service port" "number: 8080" "$out"
+absent "ingress HTTP: no hard-coded port" "number: 9000" "$out"
+
+out=$(helm template portainer "$CHART" --show-only templates/ingress.yaml \
+  --set "ingress.hosts[0].paths[0].path=/" \
+  --set ingress.enabled=true,tls.force=true,service.httpsPort=8443)
+check "ingress HTTPS: custom service port" "number: 8443" "$out"
+absent "ingress HTTPS: no hard-coded port" "number: 9443" "$out"
+
+out=$(helm template portainer "$CHART" --kube-version 1.19.0 --show-only templates/ingress.yaml \
+  --set "ingress.hosts[0].paths[0].path=/" \
+  --set ingress.enabled=true,service.httpPort=8080)
+check "ingress legacy HTTP: custom service port" "servicePort: 8080" "$out"
+absent "ingress legacy HTTP: no hard-coded port" "servicePort: 9000" "$out"
+
+out=$(helm template portainer "$CHART" --kube-version 1.19.0 --show-only templates/ingress.yaml \
+  --set "ingress.hosts[0].paths[0].path=/" \
+  --set ingress.enabled=true,tls.force=true,service.httpsPort=8443)
+check "ingress legacy HTTPS: custom service port" "servicePort: 8443" "$out"
+absent "ingress legacy HTTPS: no hard-coded port" "servicePort: 9443" "$out"
+
 # EE image selection: enterpriseEdition.enabled=true must use the EE image
 out=$(helm template portainer "$CHART" --set enterpriseEdition.enabled=true)
 check  "EE enabled: EE image used"  "portainer-ee" "$out"
