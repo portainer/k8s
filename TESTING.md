@@ -140,6 +140,14 @@ helm install portainer charts/portainer \
 
 ---
 
+## Ingress service port regression tests
+
+Run `python3 tests/ingress-ports.py` with Helm on `PATH` (or set `HELM` to its
+executable path). This checks default and custom HTTP/HTTPS service ports and
+explicit per-path overrides for both Ingress API variants, without a cluster.
+
+---
+
 ## Adding new tests
 
 - **Template test** (no cluster): add a `check` or `absent` assertion to the

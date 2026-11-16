@@ -43,16 +43,16 @@ spec:
                 name: {{ $fullName }}
                 port:
                 {{- if $tlsforced }}
-                  number: {{ .port | default 9443 }}
+                  number: {{ .port | default $.Values.service.httpsPort }}
                 {{- else }}
-                  number: {{ .port | default 9000 }}
+                  number: {{ .port | default $.Values.service.httpPort }}
                 {{- end }}
             {{- else }}
               serviceName: {{ $fullName }}
               {{- if $tlsforced }}
-              servicePort: {{ .port | default 9443 }}
+              servicePort: {{ .port | default $.Values.service.httpsPort }}
               {{- else }}
-              servicePort: {{ .port | default 9000 }}
+              servicePort: {{ .port | default $.Values.service.httpPort }}
               {{- end }}
             {{- end }}
         {{- end }}
