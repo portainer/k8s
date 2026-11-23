@@ -33,6 +33,15 @@ vol_consistent() {
     || { echo "FAIL [volume consistency: $desc]: name mismatch between volumes and volumeMounts"; fail=1; }
 }
 
+# probe <name> <output>: one probe block flattened to a single line,
+# e.g. "failureThreshold: 30 periodSeconds: 10 httpGet: path: / port: 9443 scheme: HTTPS"
+probe() {
+  echo "$2" | awk -v p="$1:" '
+    $1 == p { f = 1; ind = index($0, p); next }
+    f && match($0, /[^ ]/) && RSTART <= ind { f = 0 }
+    f { sub(/^ +/, ""); printf "%s ", $0 }'
+}
+
 # Default: tunnel-port rendered for NodePort with edgeNodePort set
 out=$(helm template portainer "$CHART")
 check "default: tunnel-port arg" "\-\-tunnel-port" "$out"
@@ -172,5 +181,30 @@ check "combined extras: feat-one flag"     "feat-one"             "$out"
 check "combined extras: feat-two flag"     "feat-two"             "$out"
 check "combined extras: --trusted-origins" "\-\-trusted-origins=" "$out"
 check "combined extras: extraEnv MY_VAR"   "MY_VAR"               "$out"
+
+# Probes: all three use the same port/scheme; startup and readiness timing
+https="port: 9443 scheme: HTTPS"
+http="port: 9000 scheme: HTTP"
+probe_cases=(
+  "default CE tag|$https|"
+  "tls.force|$https|--set tls.force=true"
+  "CE latest|$https|--set image.tag=latest"
+  "CE 2.6.0|$http|--set image.tag=2.6.0"
+  "CE develop|$http|--set image.tag=develop"
+  "EE default tag|$https|--set enterpriseEdition.enabled=true"
+  "EE 2.7.0|$http|--set enterpriseEdition.enabled=true --set enterpriseEdition.image.tag=2.7.0"
+  "EE develop + tls.force|$https|--set enterpriseEdition.enabled=true --set enterpriseEdition.image.tag=develop --set tls.force=true"
+)
+for c in "${probe_cases[@]}"; do
+  IFS='|' read -r name want args <<< "$c"
+  # shellcheck disable=SC2086
+  out=$(helm template portainer "$CHART" $args)
+  for p in startupProbe readinessProbe livenessProbe; do
+    check "probes $name: $p $want" "$want" "$(probe "$p" "$out")"
+  done
+done
+out=$(helm template portainer "$CHART")
+check "probes: startup 10 s x 30" "failureThreshold: 30 periodSeconds: 10 " "$(probe startupProbe "$out")"
+check "probes: readiness no delay, every 10 s" "initialDelaySeconds: 0 periodSeconds: 10 " "$(probe readinessProbe "$out")"
 
 exit $fail

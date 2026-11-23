@@ -85,3 +85,26 @@ networking.k8s.io/v1beta1
 extensions/v1
 {{- end }}
 {{- end -}}
+
+{{/*
+Port and scheme for the HTTP probes. HTTPS on 9443 when tls.force is set, for
+the "latest" tag, or for semver tags above CE 2.6.0 / EE 2.7.0; HTTP on 9000
+otherwise.
+*/}}
+{{- define "portainer.probeEndpoint" -}}
+{{- $tag := ternary .Values.enterpriseEdition.image.tag .Values.image.tag .Values.enterpriseEdition.enabled -}}
+{{- $minTls := ternary "2.7.0" "2.6.0" .Values.enterpriseEdition.enabled -}}
+{{- $https := .Values.tls.force -}}
+{{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" $tag -}}
+{{- $https = or $https (semverCompare (printf ">%s" $minTls) $tag) -}}
+{{- else -}}
+{{- $https = or $https (eq $tag "latest") -}}
+{{- end -}}
+{{- if $https -}}
+port: 9443
+scheme: HTTPS
+{{- else -}}
+port: 9000
+scheme: HTTP
+{{- end -}}
+{{- end -}}

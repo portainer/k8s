@@ -145,143 +145,20 @@ spec:
             periodSeconds: 10
             httpGet:
               path: /
-              {{- if .Values.tls.force }}
-              port: 9443
-              scheme: HTTPS
-              {{- else }}
-                {{- if .Values.enterpriseEdition.enabled }}
-                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.enterpriseEdition.image.tag }}
-                    {{- if eq (semver .Values.enterpriseEdition.image.tag | (semver "2.7.0").Compare) -1 }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end }}
-                  {{- else }}
-                    {{- if eq .Values.enterpriseEdition.image.tag "latest" }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end }}
-                  {{- end}}
-                {{- else }}
-                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.image.tag }}
-                    {{- if eq (semver .Values.image.tag | (semver "2.6.0").Compare) -1 }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end}}
-                  {{- else }}
-                    {{- if eq .Values.image.tag "latest" }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end }}
-                  {{- end }}
-                {{- end }}
-              {{- end }}
+              {{- include "portainer.probeEndpoint" . | nindent 14 }}
           livenessProbe:
             failureThreshold: 5
             initialDelaySeconds: 45
             periodSeconds: 30
             httpGet:
               path: /
-              {{- if .Values.tls.force }}
-              port: 9443
-              scheme: HTTPS
-              {{- else }}
-                {{- if .Values.enterpriseEdition.enabled }}
-                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.enterpriseEdition.image.tag }}
-                    {{- if eq (semver .Values.enterpriseEdition.image.tag | (semver "2.7.0").Compare) -1 }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end }}
-                  {{- else }}
-                    {{- if eq .Values.enterpriseEdition.image.tag "latest" }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end }}
-                  {{- end}}
-                {{- else }}
-                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.image.tag }}
-                    {{- if eq (semver .Values.image.tag | (semver "2.6.0").Compare) -1 }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end}}
-                  {{- else }}
-                    {{- if eq .Values.image.tag "latest" }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end }}
-                  {{- end }}
-                {{- end }}
-              {{- end }}
+              {{- include "portainer.probeEndpoint" . | nindent 14 }}
           readinessProbe:
             failureThreshold: 5
             initialDelaySeconds: 0
             periodSeconds: 10
             httpGet:
               path: /
-              {{- if .Values.tls.force }}
-              port: 9443
-              scheme: HTTPS
-              {{- else }}
-                {{- if .Values.enterpriseEdition.enabled }}
-                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.enterpriseEdition.image.tag }}
-                    {{- if eq (semver .Values.enterpriseEdition.image.tag | (semver "2.7.0").Compare) -1 }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end }}
-                  {{- else }}
-                    {{- if eq .Values.enterpriseEdition.image.tag "latest" }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end }}
-                  {{- end}}
-                {{- else }}
-                  {{- if regexMatch "^[0-9]+\\.[0-9]+\\.[0-9]+$" .Values.image.tag }}
-                    {{- if eq (semver .Values.image.tag | (semver "2.6.0").Compare) -1 }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end}}
-                  {{- else }}
-                    {{- if eq .Values.image.tag "latest" }}
-              port: 9443
-              scheme: HTTPS
-                    {{- else }}
-              port: 9000
-              scheme: HTTP
-                    {{- end }}
-                  {{- end }}
-                {{- end }}
-              {{- end }}
+              {{- include "portainer.probeEndpoint" . | nindent 14 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
