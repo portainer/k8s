@@ -69,6 +69,7 @@ The following table lists the configurable parameters of the Portainer chart and
 | `service.httpPort` | HTTP port for accessing Portainer Web | `9000` |
 | `service.httpNodePort` | Static NodePort for accessing Portainer Web. Specify only if the type is NodePort | `30777` |
 | `service.edgePort` | TCP port for accessing Portainer Edge | `8000` |
+| `service.edgeTargetPort` | TCP port for accessing Portainer Edge. Specify if edgePort is different due to ingress | `8000` |
 | `service.edgeNodePort` | Static NodePort for accessing Portainer Edge. Specify only if the type is NodePort | `30776` |
 | `service.annotations` | Annotations to add to the service | `{}` |
 | `feature.flags` | Enable one or more features separated by spaces. For instance, `--feat=open-amt` | `nil` |
